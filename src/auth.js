@@ -279,7 +279,7 @@ export class AuthManager {
     }
   }
 
-  // Show clean email dispatch notification (NO OTP reveal, NO auto-fill button)
+  // Show clean email dispatch notification (Compact, small floating capsule)
   showEmailToast(email, status = {}) {
     let toast = document.getElementById("email-otp-toast");
     if (!toast) {
@@ -294,38 +294,11 @@ export class AuthManager {
       this.toastHideTimer = null;
     }
 
-    const isRealSuccess = status.realEmailSent;
-
     toast.innerHTML = `
-      <div class="toast-content">
-        <div class="toast-icon">
-          <i class="fa-solid fa-envelope-circle-check"></i>
-        </div>
-        <div class="toast-text">
-          <div class="toast-header-meta">
-            <span class="toast-tag" style="background: rgba(29, 185, 84, 0.2); color: var(--spotify-green); font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem;">
-              <i class="fa-solid fa-paper-plane"></i> Email Sent
-            </span>
-            <span class="toast-time">Just now</span>
-          </div>
-          <div class="toast-title">Verification Code Sent</div>
-          <div class="toast-desc">
-            We have sent a 6-digit verification code to <strong style="color: #fff;">${email}</strong>.
-            Please check your inbox (and spam/junk folder) and enter it below.
-          </div>
-          ${isRealSuccess ? `
-            <div style="font-size: 0.75rem; color: #1DB954; display: flex; align-items: center; gap: 5px; margin-top: 4px;">
-              <i class="fa-solid fa-circle-check"></i>
-              <span>Dispatched via Gmail SMTP to your inbox</span>
-            </div>
-          ` : `
-            <div style="font-size: 0.75rem; color: var(--text-sub); display: flex; align-items: center; gap: 5px; margin-top: 4px;">
-              <i class="fa-solid fa-circle-info"></i>
-              <span>Check your email inbox to enter your code</span>
-            </div>
-          `}
-        </div>
-        <button class="toast-close" id="toast-close-btn" title="Dismiss notification"><i class="fa-solid fa-xmark"></i></button>
+      <div class="toast-content" style="display: flex; align-items: center; gap: 8px;">
+        <span style="color: #00f59b; display: flex; align-items: center;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"></path><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></span>
+        <span style="color: #fff; font-size: 0.8rem; font-weight: 600;">Code sent to ${email}</span>
+        <button class="toast-close" id="toast-close-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px; margin-left: 6px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
     `;
 
@@ -338,10 +311,9 @@ export class AuthManager {
       toast.classList.remove("visible");
     });
 
-    // Auto-hide toast after 25 seconds
     this.toastHideTimer = setTimeout(() => {
       if (toast) toast.classList.remove("visible");
-    }, 25000);
+    }, 6000);
   }
 
   // Display Gmail Configuration Status Modal

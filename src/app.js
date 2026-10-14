@@ -1171,8 +1171,6 @@ class SpotifyApp {
         this.renderLikedSongsView();
       }
 
-      this.showToastNotification("Added to Liked Songs", `"${track.title}" has been saved to your account in the database.`);
-
       // Persist addition to server database
       try {
         await fetch("/api/liked-songs", {
@@ -1432,7 +1430,7 @@ class SpotifyApp {
             this.pendingLikeTrack = null;
           }
           this.closeAuthModal();
-          this.showToastNotification(`Welcome back, ${result.user.name}!`, "Logged in successfully. Your liked songs are synchronized.");
+          this.showToastNotification(`Signed in as ${result.user.name}`);
           if (this.currentView === "playlist") this.renderLikedSongsView();
         } catch (err) {
           this.showEmailError(err.message || "Login failed. Please check your credentials.");
@@ -1675,7 +1673,7 @@ class SpotifyApp {
         this.pendingLikeTrack = null;
       }
       this.closeAuthModal();
-      this.showToastNotification(`Welcome to Melo, ${user.name}!`, "Account verified and connected to database.");
+      this.showToastNotification(`Signed in as ${user.name}`);
       if (this.currentView === "playlist") this.renderLikedSongsView();
     } catch (err) {
       const otpContainer = document.querySelector(".otp-inputs-grid");
@@ -1699,21 +1697,29 @@ class SpotifyApp {
     }
   }
 
-  showToastNotification(title, desc) {
-    const toast = document.createElement("div");
-    toast.className = "email-toast-banner visible";
-    toast.style.cssText = "top: 20px; right: 20px; z-index: 1000; border-left: 4px solid #1DB954;";
+  showToastNotification(message) {
+    if (!message) return;
+    let toast = document.getElementById("melo-micro-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "melo-micro-toast";
+      toast.className = "melo-micro-toast";
+      document.body.appendChild(toast);
+    }
+
     toast.innerHTML = `
-      <div class="toast-content">
-        <div class="toast-icon" style="color: #1DB954;"><i class="fa-solid fa-circle-check"></i></div>
-        <div class="toast-text">
-          <div class="toast-title" style="color: #fff; font-weight: 700;">${title}</div>
-          <div class="toast-desc" style="color: var(--text-sub); font-size: 0.82rem;">${desc}</div>
-        </div>
-      </div>
+      <span class="toast-dot"></span>
+      <span class="toast-msg">${message}</span>
     `;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+
+    toast.classList.remove("visible");
+    void toast.offsetWidth;
+    toast.classList.add("visible");
+
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast?.classList.remove("visible");
+    }, 2200);
   }
 
   openAuthModal(mode = "login") {
@@ -1858,7 +1864,7 @@ class SpotifyApp {
         this.loadLikedSongsForUser(null);
         const mobAuthLabel = document.getElementById("mobile-auth-nav-label");
         if (mobAuthLabel) mobAuthLabel.textContent = "Log In";
-        this.showToastNotification("Logged out", "You have signed out of your account.");
+        this.showToastNotification("Signed out");
       });
     } else {
       this.authHeaderContainer.innerHTML = `

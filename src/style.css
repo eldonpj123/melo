@@ -2299,59 +2299,71 @@ body:not(.is-playing) .eq-col {
   box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
 }
 
+/* Sleek Micro-Toast Notification (Minimalist Floating Pill) */
+.melo-micro-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-24px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(14, 18, 30, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 16px rgba(99, 102, 241, 0.25);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  z-index: 999999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.melo-micro-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.melo-micro-toast .toast-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+  flex-shrink: 0;
+}
+
 /* Toast Notifications */
 .email-toast-banner {
   position: fixed;
-  bottom: 110px;
-  right: 24px;
-  max-width: 420px;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-24px);
+  width: auto;
+  max-width: min(90vw, 360px);
   background: rgba(16, 21, 35, 0.96);
-  backdrop-filter: blur(28px);
-  border: 1px solid var(--border-glass);
-  border-left: 4px solid var(--accent-cyan);
-  border-radius: 14px;
-  padding: 14px 18px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
-  z-index: 1100;
-  transform: translateY(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  padding: 8px 16px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+  z-index: 999999;
   opacity: 0;
-  transition: all 0.3s var(--ease-spring);
+  transition: all 0.25s var(--ease-spring);
   pointer-events: none;
 }
 
 .email-toast-banner.visible {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
   opacity: 1;
   pointer-events: auto;
-}
-
-.toast-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.toast-icon {
-  font-size: 1.25rem;
-  color: var(--accent-cyan);
-  margin-top: 2px;
-}
-
-.toast-text {
-  flex: 1;
-}
-
-.toast-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 2px;
-}
-
-.toast-desc {
-  font-size: 0.82rem;
-  color: var(--text-sub);
-  line-height: 1.4;
 }
 
 .toast-close {
@@ -2414,11 +2426,17 @@ body:not(.is-playing) .eq-col {
   }
 
   .email-toast-banner {
-    left: 12px;
-    right: 12px;
-    bottom: 86px;
-    max-width: none;
-    padding: 12px 14px;
+    top: 14px;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-20px);
+    max-width: min(92vw, 340px);
+    padding: 7px 14px;
+  }
+
+  .email-toast-banner.visible {
+    transform: translateX(-50%) translateY(0);
   }
 
   .spatial-app-layout {
