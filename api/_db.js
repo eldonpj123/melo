@@ -2,11 +2,32 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 
-const DB_PATH = path.join(process.cwd(), "data", "database.json");
+const LOCAL_DB_PATH = path.join(process.cwd(), "data", "database.json");
+const TMP_DB_PATH = path.join("/tmp", "database.json");
+
+function getDbPath(forWrite = false) {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return TMP_DB_PATH;
+  }
+  return LOCAL_DB_PATH;
+}
 
 export function readDb() {
+  const targetPath = getDbPath(false);
+  
+  // On Vercel, initialize /tmp/database.json from bundled LOCAL_DB_PATH if not yet copied
+  if (targetPath === TMP_DB_PATH && !fs.existsSync(TMP_DB_PATH) && fs.existsSync(LOCAL_DB_PATH)) {
+    try {
+      fs.mkdirSync("/tmp", { recursive: true });
+      fs.copyFileSync(LOCAL_DB_PATH, TMP_DB_PATH);
+    } catch (e) {
+      // ignore
+    }
+  }
+
   try {
-    const parsed = JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
+    const raw = fs.readFileSync(fs.existsSync(targetPath) ? targetPath : LOCAL_DB_PATH, "utf8");
+    const parsed = JSON.parse(raw);
     return {
       users: Array.isArray(parsed.users) ? parsed.users : [],
       likedSongs: parsed.likedSongs && typeof parsed.likedSongs === "object" ? parsed.likedSongs : {}
@@ -17,8 +38,20 @@ export function readDb() {
 }
 
 export function writeDb(db) {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), "utf8");
+  const targetPath = getDbPath(true);
+  try {
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+    fs.writeFileSync(targetPath, JSON.stringify(db, null, 2), "utf8");
+  } catch (err) {
+    // If writing to process.cwd() failed due to read-only filesystem, fallback to /tmp
+    try {
+      fs.mkdirSync("/tmp", { recursive: true });
+      fs.writeFileSync(TMP_DB_PATH, JSON.stringify(db, null, 2), "utf8");
+    } catch (fallbackErr) {
+      console.error("Database write error:", fallbackErr);
+      throw fallbackErr;
+    }
+  }
 }
 
 export function hashPassword(password) {
