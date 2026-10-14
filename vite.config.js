@@ -333,10 +333,11 @@ export default defineConfig(({ mode }) => {
                 db.likedSongs[cleanEmail] = [];
               }
 
-              const existingIdx = db.likedSongs[cleanEmail].findIndex((s) => s.id === track.id);
+              const trackIdStr = String(track.id);
+              const existingIdx = db.likedSongs[cleanEmail].findIndex((s) => String(s.id) === trackIdStr);
               if (existingIdx === -1) {
                 db.likedSongs[cleanEmail].unshift({
-                  id: track.id,
+                  id: trackIdStr,
                   title: track.title || "Track",
                   artist: track.artist || "Artist",
                   album: track.album || "Single",
@@ -369,8 +370,9 @@ export default defineConfig(({ mode }) => {
               }
 
               const db = getDb();
+              const trackIdStr = String(trackId);
               if (db.likedSongs[cleanEmail]) {
-                db.likedSongs[cleanEmail] = db.likedSongs[cleanEmail].filter((s) => s.id !== trackId);
+                db.likedSongs[cleanEmail] = db.likedSongs[cleanEmail].filter((s) => String(s.id) !== trackIdStr);
                 saveDb(db);
               }
 

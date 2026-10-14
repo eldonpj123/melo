@@ -41,15 +41,9 @@ class SpotifyApp {
     await this.spotifyClient.handleCallback();
     this.updateSpotifyStatusUI();
 
-    // Load liked songs from database for logged-in user
+    // Load liked songs from database for logged-in user or guest
     const currentUser = this.authManager.getUser();
-    if (currentUser && currentUser.email) {
-      await this.loadLikedSongsForUser(currentUser);
-    } else {
-      this.accountLikedSongs = [];
-      this.likedTrackIds.clear();
-      this.updateLikedSongsCounter();
-    }
+    await this.loadLikedSongsForUser(currentUser);
 
     // Set initial queue
     this.audioEngine.setQueue(this.tracks);
@@ -666,52 +660,27 @@ class SpotifyApp {
       if (ownerEl) ownerEl.textContent = user.name || user.email;
       if (descEl) descEl.textContent = `Stored in database for ${user.email}. Synchronized across all your devices.`;
     } else {
-      if (ownerEl) ownerEl.textContent = "Guest";
-      if (descEl) descEl.textContent = "Log in to permanently store your liked songs in your personal database.";
+      if (ownerEl) ownerEl.textContent = "Guest Listener";
+      if (descEl) descEl.textContent = "Saved on this device. Sign in to synchronize your collection across all devices.";
     }
 
-    // Build unique list of liked songs
+    // Build unique list of liked songs strictly by String ID
     const combinedMap = new Map();
     (this.accountLikedSongs || []).forEach(t => {
-      if (t && t.id) combinedMap.set(t.id, t);
+      if (t && t.id && this.likedTrackIds.has(String(t.id))) {
+        combinedMap.set(String(t.id), { ...t, id: String(t.id) });
+      }
     });
     this.tracks.forEach(t => {
-      if (this.likedTrackIds.has(t.id) && !combinedMap.has(t.id)) {
-        combinedMap.set(t.id, t);
+      if (t && t.id && this.likedTrackIds.has(String(t.id)) && !combinedMap.has(String(t.id))) {
+        combinedMap.set(String(t.id), { ...t, id: String(t.id) });
       }
     });
 
     const likedTracks = Array.from(combinedMap.values());
     if (countEl) countEl.textContent = `${likedTracks.length} ${likedTracks.length === 1 ? 'song' : 'songs'}`;
 
-    // Case 1: User is logged out
-    if (!user || !user.email) {
-      if (container) {
-        container.innerHTML = `
-          <div class="liked-empty-state">
-            <div class="empty-icon-orb">
-              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </div>
-            <h3>Sign in to see your Liked Songs</h3>
-            <p>Your saved favorites are tied to your personal Melo account in the database. Log in or create an account to start building your collection.</p>
-            <button class="btn-primary" id="liked-empty-login-btn" style="padding: 10px 24px; border-radius: 50px; cursor: pointer;">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-              <span>Log In or Sign Up</span>
-            </button>
-          </div>
-        `;
-        document.getElementById("liked-empty-login-btn")?.addEventListener("click", () => {
-          this.openAuthModal("login");
-        });
-      }
-      if (playAllBtn) {
-        playAllBtn.style.opacity = "0.5";
-        playAllBtn.onclick = () => this.openAuthModal("login");
-      }
-      return;
-    }
-
-    // Case 2: User is logged in, but has 0 liked songs
+    // If 0 liked songs, display empty state
     if (likedTracks.length === 0) {
       if (container) {
         container.innerHTML = `
@@ -720,15 +689,25 @@ class SpotifyApp {
               <svg viewBox="0 0 24 24" width="36" height="36" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             </div>
             <h3>Songs you like will appear here</h3>
-            <p>Save songs to your account by tapping the heart icon on any track while streaming in 320kbps lossless audio.</p>
-            <button class="btn-pill" id="liked-empty-discover-btn" style="cursor: pointer;">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-              <span>Discover Trending Songs</span>
-            </button>
+            <p>Save songs to your collection by tapping the heart icon on any track while streaming in 320kbps lossless audio.</p>
+            <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
+              <button class="btn-pill" id="liked-empty-discover-btn" style="cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                <span>Discover Trending Songs</span>
+              </button>
+              ${!user || !user.email ? `
+                <button class="btn-signup-ghost" id="liked-empty-login-btn" style="cursor: pointer; padding: 9px 18px; border-radius: 50px;">
+                  <span>Sign In / Sign Up</span>
+                </button>
+              ` : ''}
+            </div>
           </div>
         `;
         document.getElementById("liked-empty-discover-btn")?.addEventListener("click", () => {
           this.switchView("home");
+        });
+        document.getElementById("liked-empty-login-btn")?.addEventListener("click", () => {
+          this.openAuthModal("login");
         });
       }
       if (playAllBtn) {
@@ -738,7 +717,7 @@ class SpotifyApp {
       return;
     }
 
-    // Case 3: User has liked songs
+    // Has liked songs
     if (playAllBtn) {
       playAllBtn.style.opacity = "1";
       playAllBtn.onclick = () => {
@@ -770,8 +749,8 @@ class SpotifyApp {
   // --- BESPOKE AUDIO STRIPS RENDERER (LUXURY NON-SPOTIFY) ---
   renderTrackTable(trackList, targetBodyId = null, wrapperContainer = null, headingHtml = "") {
     const stripsHtml = trackList.map((track, idx) => {
-      const isCurrent = this.audioEngine.currentTrack?.id === track.id;
-      const isLiked = this.likedTrackIds.has(track.id);
+      const isCurrent = this.audioEngine.currentTrack && String(this.audioEngine.currentTrack.id) === String(track.id);
+      const isLiked = this.likedTrackIds.has(String(track.id));
       return `
         <div class="audio-strip track-row ${isCurrent ? 'playing' : ''}" data-track-id="${track.id}">
           <div class="strip-left">
@@ -785,7 +764,7 @@ class SpotifyApp {
               <button class="strip-play-glyph"><i class="fa-solid fa-play"></i></button>
             </div>
             <div class="strip-art-frame">
-              <img src="${track.cover}" alt="${track.title}" class="strip-cover" loading="lazy">
+              <img src="${track.cover || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80'}" alt="${track.title}" class="strip-cover" loading="lazy">
             </div>
             <div class="strip-info">
               <span class="strip-title">${track.title}</span>
@@ -797,8 +776,11 @@ class SpotifyApp {
           </div>
           <div class="strip-right">
             <span class="strip-badge-lossless">${track.genre || "320K HD"}</span>
-            <button class="strip-like-btn ${isLiked ? 'liked' : ''}" data-like-id="${track.id}" title="${isLiked ? 'Saved in Account Database' : 'Save to Liked Songs'}">
-              <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i>
+            <button class="strip-like-btn ${isLiked ? 'liked' : ''}" data-like-id="${track.id}" title="${isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}">
+              ${isLiked
+                ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'
+                : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'
+              }
             </button>
             <span class="strip-duration">${this.formatTime(track.duration)}</span>
           </div>
@@ -831,13 +813,17 @@ class SpotifyApp {
         if (e.target.closest(".strip-like-btn")) {
           e.stopPropagation();
           const trId = row.getAttribute("data-track-id");
-          const track = trackList.find(t => t.id === trId);
+          const track = trackList.find(t => String(t.id) === String(trId)) ||
+                        this.tracks.find(t => String(t.id) === String(trId)) ||
+                        this.accountLikedSongs.find(t => String(t.id) === String(trId));
           if (track) this.toggleLikeTrackDirect(track);
           return;
         }
 
         const id = row.getAttribute("data-track-id");
-        const track = trackList.find(t => t.id === id);
+        const track = trackList.find(t => String(t.id) === String(id)) ||
+                      this.tracks.find(t => String(t.id) === String(id)) ||
+                      this.accountLikedSongs.find(t => String(t.id) === String(id));
         if (track) {
           this.audioEngine.setQueue(trackList);
           this.audioEngine.loadTrack(track);
@@ -1110,50 +1096,46 @@ class SpotifyApp {
   }
 
   async toggleLikeTrackDirect(track) {
-    if (!track) return;
-    const user = this.authManager.getUser();
-
-    // Liked songs of the account must be stored in the database
-    if (!user || !user.email) {
-      this.pendingLikeTrack = track;
-      this.openAuthModal("login");
-      if (this.emailErrorMsg) {
-        this.emailErrorMsg.textContent = "Please log in to save liked songs to your Melo account in the database.";
-        this.emailErrorMsg.classList.remove("hidden");
-        this.emailErrorMsg.style.display = "block";
-      }
-      return;
-    }
-
-    const cleanEmail = user.email.toLowerCase().trim();
+    if (!track || !track.id) return;
     const trackId = String(track.id);
+    const user = this.authManager.getUser();
+    const cleanEmail = (user && user.email) ? user.email.toLowerCase().trim() : null;
+    const storageKey = cleanEmail ? `liked_songs_${cleanEmail}` : "liked_songs_guest";
+    const idStorageKey = cleanEmail ? `liked_track_ids_${cleanEmail}` : "liked_track_ids_guest";
 
     if (this.likedTrackIds.has(trackId)) {
-      // Remove from liked
+      // 1. REMOVE FROM LIKED
       this.likedTrackIds.delete(trackId);
-      this.accountLikedSongs = this.accountLikedSongs.filter(s => s.id !== trackId);
+      this.accountLikedSongs = this.accountLikedSongs.filter(s => String(s.id) !== trackId);
+
+      // Save to local storage cache immediately
+      localStorage.setItem(storageKey, JSON.stringify(this.accountLikedSongs));
+      localStorage.setItem(idStorageKey, JSON.stringify(Array.from(this.likedTrackIds)));
+
       this.updateHeartIconUI();
       this.updateLikedSongsCounter();
 
-      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+      if (this.currentView === "playlist" && (!this.activePlaylist || this.activePlaylist.id === "liked-songs")) {
         this.renderLikedSongsView();
       }
 
-      // Persist deletion to server database
-      try {
-        await fetch("/api/liked-songs", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: cleanEmail, trackId })
-        });
-      } catch (err) {
-        console.warn("Failed to delete liked song from DB:", err);
+      // Persist deletion to server database if logged in
+      if (cleanEmail) {
+        try {
+          await fetch("/api/liked-songs", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: cleanEmail, trackId })
+          });
+        } catch (err) {
+          console.warn("Failed to delete liked song from DB:", err);
+        }
       }
     } else {
-      // Add to liked
+      // 2. ADD TO LIKED
       this.likedTrackIds.add(trackId);
       const trackObj = {
-        id: track.id,
+        id: trackId,
         title: track.title || "Track",
         artist: track.artist || "Artist",
         album: track.album || "Single",
@@ -1163,80 +1145,114 @@ class SpotifyApp {
         genre: track.genre || "Music",
         likedAt: Date.now()
       };
-      this.accountLikedSongs.unshift(trackObj);
+
+      // Ensure no duplicate IDs in array
+      this.accountLikedSongs = [trackObj, ...this.accountLikedSongs.filter(s => String(s.id) !== trackId)];
+
+      // Save to local storage cache immediately
+      localStorage.setItem(storageKey, JSON.stringify(this.accountLikedSongs));
+      localStorage.setItem(idStorageKey, JSON.stringify(Array.from(this.likedTrackIds)));
+
       this.updateHeartIconUI();
       this.updateLikedSongsCounter();
 
-      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+      if (this.currentView === "playlist" && (!this.activePlaylist || this.activePlaylist.id === "liked-songs")) {
         this.renderLikedSongsView();
       }
 
-      // Persist addition to server database
-      try {
-        await fetch("/api/liked-songs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: cleanEmail, track: trackObj })
-        });
-      } catch (err) {
-        console.warn("Failed to save liked song to DB:", err);
+      // Persist addition to server database if logged in
+      if (cleanEmail) {
+        try {
+          const res = await fetch("/api/liked-songs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: cleanEmail, track: trackObj })
+          });
+          if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+            if (data.success && Array.isArray(data.likedSongs)) {
+              // Merge server songs with client's active songs (never drop locally added songs!)
+              const mergedMap = new Map();
+              data.likedSongs.forEach(s => {
+                if (s && s.id) mergedMap.set(String(s.id), { ...s, id: String(s.id) });
+              });
+              this.accountLikedSongs.forEach(s => {
+                if (s && s.id && this.likedTrackIds.has(String(s.id))) {
+                  mergedMap.set(String(s.id), { ...s, id: String(s.id) });
+                }
+              });
+              this.accountLikedSongs = Array.from(mergedMap.values());
+              this.likedTrackIds = new Set(this.accountLikedSongs.map(s => String(s.id)));
+              localStorage.setItem(storageKey, JSON.stringify(this.accountLikedSongs));
+              localStorage.setItem(idStorageKey, JSON.stringify(Array.from(this.likedTrackIds)));
+              this.updateLikedSongsCounter();
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to save liked song to DB:", err);
+        }
       }
     }
-
-    // Cache to account local storage
-    localStorage.setItem(`liked_songs_${cleanEmail}`, JSON.stringify(this.accountLikedSongs));
-    localStorage.setItem(`liked_track_ids_${cleanEmail}`, JSON.stringify(Array.from(this.likedTrackIds)));
   }
 
   async loadLikedSongsForUser(user) {
-    if (!user || !user.email) {
-      this.likedTrackIds.clear();
-      this.accountLikedSongs = [];
-      this.updateHeartIconUI();
-      this.updateLikedSongsCounter();
-      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
-        this.renderLikedSongsView();
+    const cleanEmail = (user && user.email) ? user.email.toLowerCase().trim() : null;
+    const storageKey = cleanEmail ? `liked_songs_${cleanEmail}` : "liked_songs_guest";
+    const idStorageKey = cleanEmail ? `liked_track_ids_${cleanEmail}` : "liked_track_ids_guest";
+
+    // 1. Immediately load synchronous local storage cache
+    try {
+      const cachedSongs = JSON.parse(localStorage.getItem(storageKey) || "null");
+      if (cachedSongs && Array.isArray(cachedSongs)) {
+        this.accountLikedSongs = cachedSongs.map(s => ({ ...s, id: String(s.id) }));
+        this.likedTrackIds = new Set(this.accountLikedSongs.map(s => String(s.id)));
+      } else {
+        this.accountLikedSongs = [];
+        this.likedTrackIds = new Set();
       }
-      return;
+    } catch {
+      this.accountLikedSongs = [];
+      this.likedTrackIds = new Set();
     }
 
-    const cleanEmail = user.email.toLowerCase().trim();
-
-    // 1. Immediately load synchronous local storage cache for this specific email
-    const cachedSongs = JSON.parse(localStorage.getItem(`liked_songs_${cleanEmail}`) || "null");
-    if (cachedSongs && Array.isArray(cachedSongs)) {
-      this.accountLikedSongs = cachedSongs;
-      this.likedTrackIds = new Set(cachedSongs.map(s => s.id));
-      this.updateHeartIconUI();
-      this.updateLikedSongsCounter();
-      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
-        this.renderLikedSongsView();
-      }
+    this.updateHeartIconUI();
+    this.updateLikedSongsCounter();
+    if (this.currentView === "playlist" && (!this.activePlaylist || this.activePlaylist.id === "liked-songs")) {
+      this.renderLikedSongsView();
     }
 
     // 2. Query database for account's saved liked songs to synchronize with cloud
-    try {
-      const res = await fetch(`/api/liked-songs?email=${encodeURIComponent(cleanEmail)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.likedSongs)) {
-          this.accountLikedSongs = data.likedSongs;
-          this.likedTrackIds = new Set(data.likedSongs.map(s => String(s.id)));
-          localStorage.setItem(`liked_songs_${cleanEmail}`, JSON.stringify(this.accountLikedSongs));
-          localStorage.setItem(`liked_track_ids_${cleanEmail}`, JSON.stringify(Array.from(this.likedTrackIds)));
-          this.updateHeartIconUI();
-          this.updateLikedSongsCounter();
-          if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
-            this.renderLikedSongsView();
+    if (cleanEmail) {
+      try {
+        const res = await fetch(`/api/liked-songs?email=${encodeURIComponent(cleanEmail)}`);
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data.success && Array.isArray(data.likedSongs)) {
+            // MERGE server songs with local songs so newly added tracks are never dropped
+            const mergedMap = new Map();
+            data.likedSongs.forEach(s => {
+              if (s && s.id) mergedMap.set(String(s.id), { ...s, id: String(s.id) });
+            });
+            this.accountLikedSongs.forEach(s => {
+              if (s && s.id && this.likedTrackIds.has(String(s.id))) {
+                mergedMap.set(String(s.id), { ...s, id: String(s.id) });
+              }
+            });
+
+            this.accountLikedSongs = Array.from(mergedMap.values());
+            this.likedTrackIds = new Set(this.accountLikedSongs.map(s => String(s.id)));
+            localStorage.setItem(storageKey, JSON.stringify(this.accountLikedSongs));
+            localStorage.setItem(idStorageKey, JSON.stringify(Array.from(this.likedTrackIds)));
+            this.updateHeartIconUI();
+            this.updateLikedSongsCounter();
+            if (this.currentView === "playlist" && (!this.activePlaylist || this.activePlaylist.id === "liked-songs")) {
+              this.renderLikedSongsView();
+            }
           }
-          if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
-            this.renderTrackTable(this.accountLikedSongs, "playlist-tracks-body");
-          }
-          return;
         }
+      } catch (err) {
+        console.debug("Database fetch liked songs error, using cache:", err);
       }
-    } catch (err) {
-      console.debug("Database fetch liked songs error, using cache:", err);
     }
   }
 
@@ -1248,7 +1264,9 @@ class SpotifyApp {
   }
 
   updateHeartIconUI() {
-    const isLiked = this.audioEngine.currentTrack && this.likedTrackIds.has(this.audioEngine.currentTrack.id);
+    const currentTrackId = this.audioEngine.currentTrack ? String(this.audioEngine.currentTrack.id) : null;
+    const isLiked = currentTrackId ? this.likedTrackIds.has(currentTrackId) : false;
+
     if (isLiked) {
       this.playerHeartBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
       if (this.drawerHeartBtn) {
@@ -1266,10 +1284,10 @@ class SpotifyApp {
     // Sync all strip like buttons across the DOM with inline SVG
     document.querySelectorAll(".strip-like-btn").forEach(btn => {
       const id = btn.getAttribute("data-like-id");
-      if (id && this.likedTrackIds.has(id)) {
+      if (id && this.likedTrackIds.has(String(id))) {
         btn.classList.add("liked");
         btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
-        btn.title = "Saved in Account Database";
+        btn.title = "Remove from Liked Songs";
       } else {
         btn.classList.remove("liked");
         btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
@@ -1425,6 +1443,17 @@ class SpotifyApp {
         try {
           const result = await this.authManager.loginWithPassword(email, password);
           await this.loadLikedSongsForUser(result.user);
+          // Migrate any guest songs if present
+          const guestSongs = JSON.parse(localStorage.getItem("liked_songs_guest") || "[]");
+          if (Array.isArray(guestSongs) && guestSongs.length > 0) {
+            for (const s of guestSongs) {
+              if (s && s.id && !this.likedTrackIds.has(String(s.id))) {
+                await this.toggleLikeTrackDirect(s);
+              }
+            }
+            localStorage.removeItem("liked_songs_guest");
+            localStorage.removeItem("liked_track_ids_guest");
+          }
           if (this.pendingLikeTrack) {
             await this.toggleLikeTrackDirect(this.pendingLikeTrack);
             this.pendingLikeTrack = null;
@@ -1668,6 +1697,17 @@ class SpotifyApp {
     try {
       const user = await this.authManager.verifyOtp(code);
       await this.loadLikedSongsForUser(user);
+      // Migrate any guest songs if present
+      const guestSongs = JSON.parse(localStorage.getItem("liked_songs_guest") || "[]");
+      if (Array.isArray(guestSongs) && guestSongs.length > 0) {
+        for (const s of guestSongs) {
+          if (s && s.id && !this.likedTrackIds.has(String(s.id))) {
+            await this.toggleLikeTrackDirect(s);
+          }
+        }
+        localStorage.removeItem("liked_songs_guest");
+        localStorage.removeItem("liked_track_ids_guest");
+      }
       if (this.pendingLikeTrack) {
         await this.toggleLikeTrackDirect(this.pendingLikeTrack);
         this.pendingLikeTrack = null;
