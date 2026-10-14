@@ -2197,8 +2197,11 @@ body:not(.is-playing) .eq-col {
 }
 
 .auth-modal-card {
-  max-width: 440px;
-  padding: 24px !important;
+  width: min(100%, 380px);
+  max-width: 380px;
+  max-height: min(82dvh, 620px);
+  padding: 20px !important;
+  overflow-y: auto;
 }
 
 @keyframes modalPop {
@@ -2314,9 +2317,10 @@ body:not(.is-playing) .eq-col {
   }
 
   .auth-modal-card {
-    width: min(100%, 390px);
-    max-height: calc(100dvh - 24px);
-    padding: 16px !important;
+    width: min(100%, 360px);
+    max-width: 360px;
+    max-height: min(80dvh, 560px);
+    padding: 14px !important;
     border-radius: 18px;
   }
 
@@ -2417,6 +2421,20 @@ body:not(.is-playing) .eq-col {
 
   .header-search-container input {
     display: none;
+  }
+
+  .header-search-container.search-active {
+    width: 150px;
+    border-radius: 18px;
+    justify-content: flex-start;
+    padding: 0 10px;
+    gap: 7px;
+  }
+
+  .header-search-container.search-active input {
+    display: block;
+    width: 100%;
+    min-width: 0;
   }
 
   .header-search-container .search-icon {
