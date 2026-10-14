@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/music/:path*",
+      "destination": "https://www.jiosaavn.com/:path*"
+    }
+  ]
+}

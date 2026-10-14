@@ -1,0 +1,50 @@
+{
+  "users": [
+    {
+      "id": "usr_1791957139567",
+      "email": "testlistener@melo.test",
+      "password": "cc4eb978ba443f92027788916cdb8384bbfa588bd7d754fa0f82c6f650d0fc77",
+      "name": "Test Listener",
+      "initial": "T",
+      "createdAt": 1791957139568,
+      "isVerified": true
+    },
+    {
+      "id": "usr_1791957297126",
+      "email": "eldonpj35@gmail.com",
+      "password": "5932ea74712f210873c52e4152cff180b945ad80fe44f42b68fe3510758b54c4",
+      "name": "Eldonpj35",
+      "initial": "E",
+      "createdAt": 1791957297127,
+      "isVerified": true
+    }
+  ],
+  "likedSongs": {
+    "testlistener@melo.test": [
+      {
+        "id": "tr-1",
+        "title": "Midnight City Lights",
+        "artist": "Neon Skyline",
+        "album": "Cyberpunk Nights",
+        "cover": "https://example.com/cover.jpg",
+        "duration": 218,
+        "audioUrl": "https://example.com/audio.mp3",
+        "genre": "Synthwave",
+        "likedAt": 1791957139636
+      }
+    ],
+    "eldonpj35@gmail.com": [
+      {
+        "id": "saavn-kBN0Uf9F",
+        "title": "Pesamale",
+        "artist": "Siri Xander, Arra Aria Khayal",
+        "album": "Pesamale",
+        "cover": "https://c.saavncdn.com/868/Pesamale-Tamil-2026-20260922125033-500x500.jpg",
+        "duration": 178,
+        "audioUrl": "https://aac.saavncdn.com/868/d5e8f13dd1565867a2c6807865b61264_320.mp4",
+        "genre": "TAMIL • 320kbps HD",
+        "likedAt": 1791957328083
+      }
+    ]
+  }
+}

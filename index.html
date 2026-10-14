@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Melo | Spatial Studio 320kbps Audio Engine</title>
+  <meta name="description" content="Melo is a spatial online music studio featuring high-fidelity 320kbps streams, real-time audio spectrum analyser, synchronized lyrics, ad-blocking shield, and account database persistence.">
+  
+  <!-- Premium Modern Typography & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="melo-spatial-theme">
+
+  <!-- Ambient Dynamic Auroral Mesh Background -->
+  <div class="spatial-bg-ambient">
+    <div class="ambient-orb orb-emerald"></div>
+    <div class="ambient-orb orb-cyan"></div>
+    <div class="ambient-orb orb-purple"></div>
+  </div>
+
+  <div id="app-container" class="spatial-app-layout">
+    
+    <!-- TOP SPATIAL COMMAND DOCK -->
+    <header class="spatial-top-dock">
+      
+      <!-- Brand Logo Section -->
+      <div class="dock-brand" id="logo-btn" title="Melo Spatial Studio">
+        <div class="brand-glyph">
+          <svg viewBox="0 0 28 28" width="28" height="28" fill="none">
+            <defs>
+              <linearGradient id="melo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00f59b" />
+                <stop offset="50%" stop-color="#00d2ff" />
+                <stop offset="100%" stop-color="#9d4edd" />
+              </linearGradient>
+            </defs>
+            <circle cx="14" cy="14" r="13" stroke="url(#melo-gradient)" stroke-width="2" stroke-dasharray="3 3" />
+            <path d="M10 20V8l11-2v12" stroke="url(#melo-gradient)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="7" cy="20" r="3" fill="#00f59b" />
+            <circle cx="18" cy="18" r="3" fill="#00d2ff" />
+          </svg>
+        </div>
+        <div class="brand-text-col">
+          <span class="brand-name">melo</span>
+          <span class="brand-badge">STUDIO • 320K</span>
+        </div>
+      </div>
+
+      <!-- Center Spatial View Pill Switcher -->
+      <nav class="dock-nav-pills nav-menu">
+        <button class="nav-item active" data-view="home">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>Discover</span>
+        </button>
+
+        <button class="nav-item" data-view="search">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search & Decrypt</span>
+        </button>
+
+        <button class="nav-item" id="liked-songs-btn" data-view="playlist">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span>Liked Collection</span>
+        </button>
+
+        <button class="nav-item" data-view="library">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Playlists</span>
+        </button>
+      </nav>
+
+      <!-- Right Command Widgets (Search, Ad-Blocker, Auth) -->
+      <div class="dock-actions">
+        
+        <!-- Global Quick Search Capsule -->
+        <div class="header-search-container" id="header-search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="global-search-input" placeholder="Search title or artist..." autocomplete="off">
+          <button id="clear-search-btn" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- Ad-Shield Cybernetic Indicator & Toggle -->
+        <div class="shield-badge-card" title="Melo Commercial-Free Filtering Engine Active">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#00f59b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span class="shield-counter-txt"><span id="ads-blocked-counter">0</span> Blocked</span>
+          <label class="switch micro-switch" title="Toggle Ad Blocker">
+            <input type="checkbox" id="ad-blocker-toggle" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <!-- History Back / Forward Controls -->
+        <div class="nav-arrows" style="display: none;">
+          <button class="arrow-btn" id="nav-back"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="arrow-btn" id="nav-forward"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <!-- User Authentication & Profile Capsule -->
+        <div id="auth-header-container" class="auth-header-buttons" style="display: flex; align-items: center; gap: 8px; position: relative;">
+          <button class="btn-signup-ghost" id="header-signup-btn">
+            <span>Sign up</span>
+          </button>
+          <button class="btn-pill" id="header-login-btn">
+            <i class="fa-regular fa-user"></i>
+            <span>Log in</span>
+          </button>
+        </div>
+
+      </div>
+
+    </header>
+
+    <!-- SPATIAL STUDIO CANVAS (MAIN AREA) -->
+    <main class="spatial-main-canvas main-wrapper">
+      
+      <!-- ====================================================================
+           VIEW: HOME (DISCOVER & STUDIO BILLBOARD)
+           ==================================================================== -->
+      <div class="content-view active" id="view-home">
+        
+        <!-- HERO CUBIC STUDIO BILLBOARD -->
+        <section class="hero-billboard-card">
+          <div class="billboard-artwork-col" id="billboard-cover-wrapper" title="Click to play / inspect stage">
+            <img id="billboard-cover" src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80" alt="Cover Art" class="billboard-img">
+            <!-- Simulated Vinyl Turntable Spin Disc -->
+            <div class="vinyl-disc-spin" id="hero-vinyl-disc">
+              <div class="vinyl-groove"></div>
+              <div class="vinyl-center-badge">
+                <span class="vinyl-dot"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="billboard-meta-col">
+            <div class="billboard-badge-row">
+              <span class="meta-stream-badge">
+                <span class="pulse-emerald"></span>
+                <span>320KBPS DIRECT CDN STREAM</span>
+              </span>
+              <span class="meta-genre-badge" id="hero-track-genre">Synthwave • Ad-Free</span>
+            </div>
+
+            <h1 class="billboard-title" id="greeting-title">Good evening</h1>
+            <h2 class="billboard-song-title" id="hero-song-title">Midnight City Lights</h2>
+            <p class="billboard-artist" id="hero-song-artist">Neon Skyline • Cyberpunk Nights</p>
+
+            <div class="billboard-controls-row">
+              <button class="btn-hero-play" id="hero-play-btn" title="Play Track">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="6,4 20,12 6,20"></polygon></svg>
+                <span>Play Studio Master</span>
+              </button>
+
+              <button class="btn-hero-glass" id="hero-stage-toggle-btn" title="Open Synchronized Lyrics & Audio Spectrum">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <span>Karaoke Lyrics & Spectrum</span>
+              </button>
+
+              <div class="hero-eq-bars" title="Real-time Frequency Resonance">
+                <span class="eq-col col-1"></span>
+                <span class="eq-col col-2"></span>
+                <span class="eq-col col-3"></span>
+                <span class="eq-col col-4"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SOUNDBOARD: QUICK LOSSLESS SAMPLES -->
+        <section class="shelf-section">
+          <div class="shelf-header">
+            <div class="shelf-title-group">
+              <h3 class="shelf-heading">Acoustic Rotation</h3>
+              <span class="shelf-subheading">Instant high-fidelity 320kbps direct master streams</span>
+            </div>
+          </div>
+          <div class="quick-grid" id="quick-play-grid">
+            <!-- Dynamically injected -->
+          </div>
+        </section>
+
+        <!-- SOUNDBOARD: MADE FOR YOU PLAYLIST TILES -->
+        <section class="shelf-section">
+          <div class="shelf-header">
+            <div class="shelf-title-group">
+              <h3 class="shelf-heading">Curated Sound Horizons</h3>
+              <span class="shelf-subheading">Commercial-free handpicked acoustic & electronic sets</span>
+            </div>
+            <a href="#" class="see-all" id="see-all-playlists-btn">Explore All</a>
+          </div>
+          <div class="card-carousel" id="made-for-you-cards">
+            <!-- Dynamically injected -->
+          </div>
+        </section>
+
+        <!-- SOUNDBOARD: VIBRANT SOUND GENRES -->
+        <section class="shelf-section">
+          <div class="shelf-header">
+            <div class="shelf-title-group">
+              <h3 class="shelf-heading">Sonic Dimensions & Frequencies</h3>
+              <span class="shelf-subheading">Select your style & atmospheric mood</span>
+            </div>
+          </div>
+          <div class="genre-grid" id="genre-grid">
+            <div class="genre-card synthwave" data-genre="Synthwave">
+              <div class="genre-card-content">
+                <span class="genre-card-tag">PULSE</span>
+                <span class="genre-card-name">Synthwave & Cyber</span>
+              </div>
+            </div>
+            <div class="genre-card lofi" data-genre="Lo-Fi">
+              <div class="genre-card-content">
+                <span class="genre-card-tag">CHILL</span>
+                <span class="genre-card-name">Lo-Fi Study Beats</span>
+              </div>
+            </div>
+            <div class="genre-card electronic" data-genre="Electronic">
+              <div class="genre-card-content">
+                <span class="genre-card-tag">CLUB</span>
+                <span class="genre-card-name">Electronic & Bass</span>
+              </div>
+            </div>
+            <div class="genre-card acoustic" data-genre="Acoustic">
+              <div class="genre-card-content">
+                <span class="genre-card-tag">PURE</span>
+                <span class="genre-card-name">Acoustic & Sunset</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STUDIO MASTER CATALOG: BESPOKE AUDIO STRIPS (NOT SPOTIFY TABLE) -->
+        <section class="shelf-section">
+          <div class="shelf-header">
+            <div class="shelf-title-group">
+              <h3 class="shelf-heading">Studio Audio Vault</h3>
+              <span class="shelf-subheading">Lossless master streams with live synced lyrics</span>
+            </div>
+          </div>
+          <div class="audio-strips-wrapper">
+            <div class="audio-strips-list" id="home-tracks-body">
+              <!-- Dynamically rendered as luxury acoustic strips -->
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ====================================================================
+           VIEW: SEARCH & DECRYPT (LIVE JIOSAAVN 320KBPS ENGINE)
+           ==================================================================== -->
+      <div class="content-view" id="view-search">
+        <div class="search-view-hero">
+          <span class="meta-tag"><i class="fa-solid fa-bolt" style="color: var(--accent-cyan);"></i> DIRECT JIOSAAVN CDN DECRYPTOR</span>
+          <h2 class="search-view-title">Search Any Track on Earth</h2>
+          <p class="search-view-desc">Stream commercial-free in 320kbps studio bitrate with real-time lyrics.</p>
+          
+          <!-- In-Page Search Bar -->
+          <div class="page-search-wrapper">
+            <div class="search-input-pill">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="view-search-input" placeholder="Search song name (e.g. Believer, Blinding Lights, Taylor Swift)..." autocomplete="off">
+              <button id="view-search-submit-btn" class="btn-primary">
+                <span>Decrypt & Play</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Trending Suggestion Chips -->
+          <div class="trending-chips-row">
+            <span class="chips-label">TRENDING NOW:</span>
+            <div class="search-filter-pills" id="quick-search-chips">
+              <button class="filter-pill chip-btn" data-query="Believer"><i class="fa-solid fa-fire" style="color: #ff5500;"></i> Believer</button>
+              <button class="filter-pill chip-btn" data-query="Blinding Lights"><i class="fa-solid fa-fire" style="color: #ff5500;"></i> Blinding Lights</button>
+              <button class="filter-pill chip-btn" data-query="Imagine Dragons">Imagine Dragons</button>
+              <button class="filter-pill chip-btn" data-query="The Weeknd">The Weeknd</button>
+              <button class="filter-pill chip-btn" data-query="Taylor Swift">Taylor Swift</button>
+              <button class="filter-pill chip-btn" data-query="Synthwave">Synthwave</button>
+              <button class="filter-pill chip-btn" data-query="Lo-Fi">Lo-Fi Chill</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-results-container" id="search-results">
+          <!-- Dynamically filled with search results -->
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           VIEW: PLAYLIST & LIKED SONGS COLLECTION
+           ==================================================================== -->
+      <div class="content-view" id="view-playlist">
+        <div class="playlist-hero">
+          <img id="playlist-detail-cover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Playlist Cover" class="playlist-cover-img">
+          <div class="playlist-meta">
+            <span class="meta-tag" id="playlist-meta-tag"><i class="fa-solid fa-database" style="color: var(--accent-cyan);"></i> ACCOUNT COLLECTION</span>
+            <h1 id="playlist-detail-title">Liked Songs</h1>
+            <p id="playlist-detail-desc" class="playlist-desc">Stored in database for your connected account.</p>
+            <div class="meta-sub">
+              <span id="playlist-detail-owner">Melo Engine</span> • 
+              <span id="playlist-detail-count">0 songs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="playlist-action-bar">
+          <button class="play-btn-large" id="playlist-play-all-btn" title="Play All Songs">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="margin-left: 2px;">
+              <polygon points="6,4 20,12 6,20"></polygon>
+            </svg>
+          </button>
+          <button class="icon-action-btn" id="playlist-like-btn" title="Collection Options">
+            <i class="fa-solid fa-heart" style="color: var(--accent-cyan);"></i>
+          </button>
+        </div>
+
+        <div class="audio-strips-wrapper">
+          <div class="audio-strips-list" id="playlist-tracks-body">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           VIEW: MY PLAYLISTS & CUSTOM MIXES
+           ==================================================================== -->
+      <div class="content-view" id="view-library">
+        <div class="shelf-header" style="margin-bottom: 24px;">
+          <div>
+            <h2 style="font-size: 2rem; font-weight: 800; color: #fff;">Your Library & Playlists</h2>
+            <p style="color: var(--text-sub); font-size: 0.9rem; margin-top: 4px;">Custom playlists, saved collections, and offline caches.</p>
+          </div>
+          <button class="btn-primary" id="create-playlist-btn" style="padding: 10px 22px;">
+            <i class="fa-solid fa-plus"></i>
+            <span>Create Playlist</span>
+          </button>
+        </div>
+
+        <div class="library-playlists-grid">
+          <ul class="playlist-list" id="sidebar-playlists" style="list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ====================================================================
+         SLIDE-OVER STUDIO STAGE (NOW PLAYING, KARAOKE LYRICS & SPECTRUM)
+         ==================================================================== -->
+    <aside class="right-drawer hidden" id="right-drawer">
+      <div class="drawer-header">
+        <div class="drawer-header-top">
+          <h3 id="drawer-title">Live Studio Stage</h3>
+          <button class="close-modal-btn" id="close-drawer-mobile" title="Close Studio Stage">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="drawer-tabs">
+          <button class="drawer-tab active" data-panel="info">Track Info</button>
+          <button class="drawer-tab" data-panel="lyrics">Karaoke Lyrics</button>
+          <button class="drawer-tab" data-panel="visualizer">Audio Spectrum</button>
+        </div>
+      </div>
+
+      <!-- Panel: Track Info & Disc Display -->
+      <div class="drawer-panel active" id="panel-info">
+        <div class="now-playing-card">
+          <div class="drawer-cover-wrapper" id="drawer-cover-wrapper" title="Click to Play / Pause Currently Playing Song">
+            <img id="drawer-cover" src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80" alt="Current Cover" class="drawer-cover-art">
+            <div class="cover-hover-overlay" id="cover-overlay-btn">
+              <svg id="cover-play-svg" viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                <polygon points="6,4 20,12 6,20"></polygon>
+              </svg>
+            </div>
+          </div>
+
+          <div class="drawer-track-details">
+            <h3 id="drawer-track-title">Select a track</h3>
+            <p id="drawer-track-artist">Melo Music Engine</p>
+          </div>
+
+          <!-- Drawer Timeline Scrubber -->
+          <div class="drawer-timeline-container">
+            <span id="drawer-current-time" class="time-label">0:00</span>
+            <div class="progress-bar-wrapper" id="drawer-progress-wrapper">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="drawer-progress-fill">
+                  <div class="progress-scrubber-dot"></div>
+                </div>
+              </div>
+              <div class="seek-tooltip" id="drawer-seek-tooltip">0:00</div>
+            </div>
+            <span id="drawer-total-duration" class="time-label" title="Click to toggle remaining time">3:38</span>
+          </div>
+
+          <!-- Dedicated Play, Pause, Prev and Next Song Buttons -->
+          <div class="drawer-playback-controls">
+            <button class="drawer-ctrl-btn" id="drawer-prev-btn" title="Previous Track">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="19,20 9,12 19,4"></polygon><rect x="4" y="4" width="3" height="16" rx="1"></rect></svg>
+            </button>
+
+            <button class="drawer-ctrl-btn drawer-play-btn" id="drawer-play-pause-btn" title="Play / Pause Song">
+              <svg id="drawer-play-svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="margin-left: 2px;">
+                <polygon points="6,4 20,12 6,20"></polygon>
+              </svg>
+            </button>
+
+            <button class="drawer-ctrl-btn" id="drawer-next-btn" title="Next Track">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5,4 15,12 5,20"></polygon><rect x="17" y="4" width="3" height="16" rx="1"></rect></svg>
+            </button>
+
+            <button class="like-btn-lg" id="drawer-heart-btn" title="Save to Liked Songs in Database">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="artist-about-card">
+          <h4>Studio Audio Engine</h4>
+          <p id="drawer-artist-bio">Streaming 320kbps HD audio with real-time spectrum analysis, synced lyrics, and ad-blocking protection.</p>
+        </div>
+      </div>
+
+      <!-- Panel: Karaoke Lyrics Engine -->
+      <div class="drawer-panel" id="panel-lyrics">
+        <div class="lyrics-scroll-container" id="lyrics-container">
+          <!-- Lyrics lines dynamically injected -->
+        </div>
+      </div>
+
+      <!-- Panel: Audio Spectrum Visualizer -->
+      <div class="drawer-panel" id="panel-visualizer">
+        <div class="visualizer-wrapper">
+          <canvas id="visualizer-canvas"></canvas>
+          <span class="vis-sublabel">Real-time Web Audio API Analyser</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ========================================================================
+       FLOATING ISLAND STUDIO PLAYER (LUXURY AUDIO CONSOLE DOCK)
+       ======================================================================== -->
+  <footer class="player-bar" id="player-bar">
+    
+    <!-- Left: Track Meta & Vinyl Disc -->
+    <div class="player-left">
+      <div class="player-thumb-wrapper" id="player-thumb-wrapper" title="Click to Play / Pause Currently Playing Track">
+        <img id="player-cover" src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80" alt="Cover" class="player-thumb">
+        <div class="thumb-hover-overlay" id="thumb-overlay-btn">
+          <svg id="thumb-play-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <polygon points="6,4 20,12 6,20"></polygon>
+          </svg>
+        </div>
+      </div>
+      <div class="player-track-meta">
+        <div class="track-title-scroll">
+          <span id="player-title" class="track-name">Midnight City Lights</span>
+        </div>
+        <span id="player-artist" class="artist-name">Neon Skyline</span>
+      </div>
+      <button class="like-btn" id="player-heart-btn" title="Save to Liked Songs (Database Synced)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Center: Playback Controls & Dual Timeline -->
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="control-btn" id="btn-shuffle" title="Shuffle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </button>
+
+        <button class="control-btn" id="btn-prev" title="Previous Track">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <polygon points="19,20 9,12 19,4"></polygon>
+            <rect x="4" y="4" width="3" height="16" rx="1"></rect>
+          </svg>
+        </button>
+
+        <!-- PROMINENT GLOWING PLAY/PAUSE ORB -->
+        <button class="control-btn play-pause-btn" id="btn-play-pause" title="Play / Pause Track" aria-label="Play or Pause Track">
+          <svg id="play-pause-svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="margin-left: 2px;">
+            <polygon points="6,4 20,12 6,20"></polygon>
+          </svg>
+        </button>
+
+        <button class="control-btn" id="btn-next" title="Next Track">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <polygon points="5,4 15,12 5,20"></polygon>
+            <rect x="17" y="4" width="3" height="16" rx="1"></rect>
+          </svg>
+        </button>
+
+        <button class="control-btn" id="btn-repeat" title="Repeat">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="playback-bar-container">
+        <span id="current-time" class="time-label">0:00</span>
+        <div class="progress-bar-wrapper" id="progress-wrapper">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-fill">
+              <div class="progress-scrubber-dot" id="progress-scrubber-dot"></div>
+            </div>
+          </div>
+          <div class="seek-tooltip" id="seek-tooltip">0:00</div>
+        </div>
+        <span id="total-duration" class="time-label" title="Click to toggle remaining time">3:38</span>
+      </div>
+    </div>
+
+    <!-- Right: Volume, Stage Toggles & Bitrate Pill -->
+    <div class="player-right">
+      <div class="shield-pill" title="Ad-Blocker Active: Commercial-Free Stream">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Ad-Free</span>
+      </div>
+      
+      <button class="icon-btn" id="toggle-lyrics-btn" title="Toggle Synchronized Lyrics">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+      </button>
+
+      <button class="icon-btn" id="toggle-drawer-btn" title="Open Stage Drawer">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+      </button>
+      
+      <div class="volume-container">
+        <button class="icon-btn" id="btn-mute" title="Mute/Unmute">
+          <svg class="vol-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        </button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
+      </div>
+    </div>
+
+    <!-- Mobile Mini-Player Progress Line -->
+    <div class="mobile-player-progress-line" id="mobile-progress-line">
+      <div class="mobile-progress-line-fill" id="mobile-progress-fill"></div>
+    </div>
+  </footer>
+
+  <!-- MOBILE BOTTOM NAVIGATION DOCK -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" data-view="home">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Discover</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="search">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span>Search</span>
+    </button>
+    <button class="mobile-nav-btn" data-view="playlist">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+      <span>Liked</span>
+    </button>
+    <button class="mobile-nav-btn" id="mobile-now-playing-btn">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+      <span>Stage</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================================
+       AUTH MODAL: PASSWORD LOGIN + REAL GMAIL OTP (DATABASE PERSISTENCE)
+       ======================================================================== -->
+  <div class="modal-overlay hidden" id="auth-modal">
+    <div class="modal-card auth-modal-card" style="max-width: 440px; padding: 28px;">
+      <div class="modal-header" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="auth-brand" style="display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="url(#melo-gradient)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3" fill="#00f59b"></circle>
+            <circle cx="18" cy="16" r="3" fill="#00d2ff"></circle>
+          </svg>
+          <span style="font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: #fff;">melo<span style="color: var(--accent-emerald); font-size: 0.75rem; font-weight: 700; margin-left: 3px;">STUDIO</span></span>
+        </div>
+        <button class="close-modal-btn" id="close-auth-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Mode Switcher Tabs: Sign up / Log in -->
+      <div class="auth-tabs" id="auth-tabs" style="display: flex; background: rgba(255,255,255,0.06); border-radius: 50px; padding: 4px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.08);">
+        <button type="button" class="auth-tab-btn" id="tab-signup-btn" data-mode="signup" style="flex: 1; padding: 8px 16px; border-radius: 50px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Sign up</button>
+        <button type="button" class="auth-tab-btn active" id="tab-login-btn" data-mode="login" style="flex: 1; padding: 8px 16px; border-radius: 50px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Log in</button>
+      </div>
+
+      <!-- Step 1: Email & Password Input -->
+      <div class="modal-body auth-step" id="auth-step-email">
+        <h3 id="auth-modal-title" style="font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; color: #fff;">Log in to Melo</h3>
+        <p id="auth-modal-desc" style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.4;">Enter your email and password to access your account.</p>
+        
+        <form id="auth-email-form" style="margin-top: 20px;">
+          <!-- Email Input Group -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="auth-email-input" style="font-size: 0.82rem; font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">Email address</label>
+            <div style="position: relative;">
+              <i class="fa-regular fa-envelope" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-sub);"></i>
+              <input type="email" id="auth-email-input" placeholder="name@example.com" required autocomplete="email" style="width: 100%; padding: 12px 14px 12px 40px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.2s;">
+            </div>
+          </div>
+
+          <!-- Password Input Group -->
+          <div class="form-group" id="auth-password-group" style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="auth-password-input" id="auth-password-label" style="font-size: 0.82rem; font-weight: 600; color: #fff;">Password</label>
+              <button type="button" id="btn-otp-login-toggle" style="background: none; border: none; color: var(--accent-emerald); font-size: 0.8rem; cursor: pointer; text-decoration: underline; font-weight: 600;">Sign in with OTP instead</button>
+            </div>
+            <div style="position: relative;">
+              <i class="fa-solid fa-lock" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-sub);"></i>
+              <input type="password" id="auth-password-input" placeholder="Enter your password" required autocomplete="current-password" style="width: 100%; padding: 12px 42px 12px 40px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.2s;">
+              <button type="button" id="btn-toggle-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-sub); cursor: pointer; padding: 4px; font-size: 0.95rem;" title="Show/Hide password">
+                <i class="fa-regular fa-eye" id="password-toggle-icon"></i>
+              </button>
+            </div>
+            <div id="password-hint-msg" style="font-size: 0.78rem; color: var(--text-sub); margin-top: 6px; display: none;">Password must be at least 6 characters.</div>
+          </div>
+
+          <div id="email-error-msg" class="hidden" style="color: #ff4d4d; font-size: 0.85rem; margin-bottom: 14px; display: none;"></div>
+
+          <button type="submit" class="btn-primary" id="btn-send-otp" style="width: 100%; padding: 13px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span id="btn-send-otp-text">Log in</span>
+            <i class="fa-solid fa-arrow-right" id="btn-send-otp-icon"></i>
+          </button>
+        </form>
+
+        <!-- Switch mode prompt link -->
+        <div style="text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--text-sub);">
+          <span id="auth-switch-prompt">Don't have an account?</span>
+          <button type="button" id="auth-switch-mode-btn" style="background: none; border: none; color: #fff; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">Sign up</button>
+        </div>
+      </div>
+
+      <!-- Step 2: 6-Digit OTP Verification (Only shown when verifying email) -->
+      <div class="modal-body auth-step hidden" id="auth-step-otp" style="display: none;">
+        <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; color: #fff;">Enter verification code</h3>
+        <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.4;">We sent a 6-digit code to <strong id="auth-target-email-label" style="color: #fff;"></strong></p>
+        
+        <form id="auth-otp-form" style="margin-top: 24px;">
+          <div class="otp-inputs-grid" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
+            <input type="text" maxlength="1" class="otp-digit" data-index="0" inputmode="numeric" autocomplete="off" required>
+            <input type="text" maxlength="1" class="otp-digit" data-index="1" inputmode="numeric" autocomplete="off" required>
+            <input type="text" maxlength="1" class="otp-digit" data-index="2" inputmode="numeric" autocomplete="off" required>
+            <input type="text" maxlength="1" class="otp-digit" data-index="3" inputmode="numeric" autocomplete="off" required>
+            <input type="text" maxlength="1" class="otp-digit" data-index="4" inputmode="numeric" autocomplete="off" required>
+            <input type="text" maxlength="1" class="otp-digit" data-index="5" inputmode="numeric" autocomplete="off" required>
+          </div>
+
+          <div id="otp-error-msg" class="hidden" style="color: #ff4d4d; font-size: 0.85rem; text-align: center; margin-bottom: 14px; display: none;"></div>
+
+          <button type="submit" class="btn-primary" id="btn-verify-otp" style="width: 100%; padding: 13px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>Verify & Enter Melo</span>
+            <i class="fa-solid fa-check"></i>
+          </button>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 0.85rem;">
+            <button type="button" id="btn-change-email" style="background: none; border: none; color: var(--text-sub); cursor: pointer; text-decoration: underline;">Change email</button>
+            <button type="button" id="btn-resend-otp" disabled style="background: none; border: none; color: var(--accent-emerald); cursor: pointer; font-weight: 600;">Resend in <span id="resend-countdown">45</span>s</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main JavaScript App Loader -->
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>
