@@ -166,26 +166,31 @@ export class AuthManager {
         body: JSON.stringify({ email: cleanEmail, otp })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          realEmailSent = true;
-        } else if (data.error) {
-          realEmailError = data.error;
-          console.debug("Gmail OTP notice:", data.error);
-        }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        realEmailError = data.message || data.error || "The verification email could not be sent.";
+        throw new Error(realEmailError);
       }
+      realEmailSent = true;
     } catch (err) {
-      console.debug("OTP dispatch fetch notice:", err);
+      sessionStorage.removeItem(this.pendingKey);
+      this.pendingEmail = null;
+      this.activeOtp = null;
+      this.otpExpiresAt = null;
+      this.pendingPassword = null;
+      this.pendingMode = null;
+      realEmailError = err.message || "The verification email could not be sent.";
+      console.error("OTP delivery failed:", err);
+      throw new Error(`${realEmailError} Please check the Gmail App Password configuration and try again.`);
     }
 
-    // Display clean delivery notification toast WITHOUT displaying OTP or Auto-Fill button
+    // Display delivery notification only after the server confirms delivery.
     this.showEmailToast(cleanEmail, { realEmailSent, realEmailError, mode });
 
     return {
       success: true,
       email: cleanEmail,
-      realEmailSent: realEmailSent,
+      realEmailSent: true,
       expiresIn: 600
     };
   }
