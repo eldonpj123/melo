@@ -85,6 +85,7 @@ class SpotifyApp {
     this.navButtons = document.querySelectorAll(".nav-item");
     this.views = document.querySelectorAll(".content-view");
     this.globalSearchInput = document.getElementById("global-search-input");
+    this.globalSearchContainer = document.querySelector(".header-search-container");
     this.clearSearchBtn = document.getElementById("clear-search-btn");
     this.viewSearchInput = document.getElementById("view-search-input");
     this.viewSearchSubmitBtn = document.getElementById("view-search-submit-btn");
@@ -185,18 +186,21 @@ class SpotifyApp {
       }
     };
 
+    if (this.globalSearchContainer && this.globalSearchInput) {
+      this.globalSearchContainer.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        this.globalSearchContainer.classList.add("search-active");
+        this.globalSearchInput.focus();
+      });
+    }
+
     if (this.globalSearchInput) {
       this.globalSearchInput.addEventListener("input", (e) => {
-        clearTimeout(searchDebounce);
-        const val = e.target.value;
-        if (this.viewSearchInput) this.viewSearchInput.value = val;
-        if (val.trim().length > 0) {
-          if (this.clearSearchBtn) this.clearSearchBtn.classList.remove("hidden");
-          this.switchView("search");
-          searchDebounce = setTimeout(() => this.performSearch(val.trim()), 300);
-        } else {
-          if (this.clearSearchBtn) this.clearSearchBtn.classList.add("hidden");
-          this.renderSearchView();
+        this.handleGlobalSearch(e.target.value);
+      });
+      this.globalSearchInput.addEventListener("blur", () => {
+        if (!this.globalSearchInput.value.trim()) {
+          this.globalSearchContainer?.classList.remove("search-active");
         }
       });
 
@@ -1020,7 +1024,7 @@ class SpotifyApp {
     }
 
     const cleanEmail = user.email.toLowerCase().trim();
-    const trackId = track.id;
+    const trackId = String(track.id);
 
     if (this.likedTrackIds.has(trackId)) {
       // Remove from liked
@@ -1096,13 +1100,16 @@ class SpotifyApp {
         const data = await res.json();
         if (data.success && Array.isArray(data.likedSongs)) {
           this.accountLikedSongs = data.likedSongs;
-          this.likedTrackIds = new Set(data.likedSongs.map(s => s.id));
+          this.likedTrackIds = new Set(data.likedSongs.map(s => String(s.id)));
           localStorage.setItem(`liked_songs_${cleanEmail}`, JSON.stringify(this.accountLikedSongs));
           localStorage.setItem(`liked_track_ids_${cleanEmail}`, JSON.stringify(Array.from(this.likedTrackIds)));
           this.updateHeartIconUI();
           this.updateLikedSongsCounter();
           if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
             this.openLikedSongsView();
+          }
+          if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+            this.renderTrackTable(this.accountLikedSongs, "playlist-tracks-body");
           }
           return;
         }
@@ -1115,7 +1122,7 @@ class SpotifyApp {
     const cachedSongs = JSON.parse(localStorage.getItem(`liked_songs_${cleanEmail}`) || "null");
     if (cachedSongs && Array.isArray(cachedSongs)) {
       this.accountLikedSongs = cachedSongs;
-      this.likedTrackIds = new Set(cachedSongs.map(s => s.id));
+      this.likedTrackIds = new Set(cachedSongs.map(s => String(s.id)));
     } else {
       this.accountLikedSongs = [];
       this.likedTrackIds.clear();
