@@ -162,12 +162,12 @@ export default defineConfig(({ mode }) => {
 
             } catch (err) {
               console.error("Gmail OTP Send Error:", err);
-              res.statusCode = 200;
+              res.statusCode = 502;
               res.setHeader("Content-Type", "application/json");
               res.end(JSON.stringify({
                 success: false,
                 configured: true,
-                error: err.message || "Failed to send email via Gmail"
+                message: "Gmail rejected the message. Check the Gmail App Password and sender account."
               }));
             }
           });
