@@ -300,15 +300,40 @@ class SpotifyApp {
       });
     });
 
+    // Mobile Account Nav button
+    document.getElementById("mobile-auth-nav-btn")?.addEventListener("click", () => {
+      const user = this.authManager.getUser();
+      if (user && user.email) {
+        const dropdown = document.getElementById("user-profile-dropdown");
+        dropdown?.classList.toggle("hidden");
+      } else {
+        this.openAuthModal("login");
+      }
+    });
+
+    // Mobile Progress Line Tap / Drag Scrubbing
+    const mobileProgressLine = document.getElementById("mobile-progress-line");
+    if (mobileProgressLine && this.mobileProgressFill) {
+      this.setupScrubberEvents(mobileProgressLine, this.mobileProgressFill, null);
+    }
+
     // Mobile Floating Mini Player Expand/Collapse
     if (this.mobileNowPlayingBtn) {
       this.mobileNowPlayingBtn.addEventListener("click", () => {
-        this.rightDrawer?.classList.toggle("mobile-expanded");
+        if (!this.rightDrawer) return;
+        if (this.rightDrawer.classList.contains("mobile-expanded")) {
+          this.rightDrawer.classList.remove("mobile-expanded");
+        } else {
+          this.rightDrawer.classList.remove("hidden");
+          this.rightDrawer.classList.add("mobile-expanded");
+          this.switchDrawerTab("info");
+        }
       });
     }
 
     if (this.closeDrawerMobile) {
-      this.closeDrawerMobile.addEventListener("click", () => {
+      this.closeDrawerMobile.addEventListener("click", (e) => {
+        e.stopPropagation();
         this.rightDrawer?.classList.remove("mobile-expanded");
       });
     }
@@ -318,8 +343,10 @@ class SpotifyApp {
       playerBar.addEventListener("click", (e) => {
         if (window.innerWidth <= 768) {
           // Don't expand if user tapped controls directly
-          if (!e.target.closest("#btn-play-pause") && !e.target.closest("#player-heart-btn")) {
+          if (!e.target.closest("#btn-play-pause") && !e.target.closest("#player-heart-btn") && !e.target.closest("#mobile-progress-line") && !e.target.closest("#toggle-lyrics-btn")) {
+            this.rightDrawer?.classList.remove("hidden");
             this.rightDrawer?.classList.add("mobile-expanded");
+            this.switchDrawerTab("info");
           }
         }
       });
@@ -338,8 +365,15 @@ class SpotifyApp {
       });
     });
 
-    document.getElementById("toggle-lyrics-btn").addEventListener("click", () => {
+    document.getElementById("toggle-lyrics-btn")?.addEventListener("click", (e) => {
+      e.stopPropagation();
       this.switchDrawerTab("lyrics");
+      if (this.rightDrawer) {
+        this.rightDrawer.classList.remove("hidden");
+        if (window.innerWidth <= 768) {
+          this.rightDrawer.classList.add("mobile-expanded");
+        }
+      }
     });
 
     // Ad Blocker Toggle
@@ -1684,19 +1718,23 @@ class SpotifyApp {
         dropdown?.classList.add("hidden");
         this.authManager.logout();
         this.loadLikedSongsForUser(null);
+        const mobAuthLabel = document.getElementById("mobile-auth-nav-label");
+        if (mobAuthLabel) mobAuthLabel.textContent = "Log In";
         this.showToastNotification("Logged out", "You have signed out of your account.");
       });
-
     } else {
       this.authHeaderContainer.innerHTML = `
         <button class="btn-signup-ghost" id="header-signup-btn">
           <span>Sign up</span>
         </button>
         <button class="btn-pill" id="header-login-btn">
-          <i class="fa-regular fa-user"></i>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span>Log in</span>
         </button>
       `;
+
+      const mobAuthLabel = document.getElementById("mobile-auth-nav-label");
+      if (mobAuthLabel) mobAuthLabel.textContent = "Log In";
 
       document.getElementById("header-signup-btn")?.addEventListener("click", () => {
         this.openAuthModal("signup");
