@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: "0.0.0.0",
+      allowedHosts: ["localhost", ".vercel.run"],
       port: 5173,
       proxy: {
         "/api/music": {
