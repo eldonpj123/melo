@@ -1548,6 +1548,65 @@ body:not(.is-playing) .eq-col {
   transform: scale(1.06);
 }
 
+/* Liked Songs Empty & Logged-Out States */
+.liked-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 44px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  margin-top: 14px;
+}
+
+.empty-icon-orb {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.empty-icon-orb.heart-orb {
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  box-shadow: 0 0 25px rgba(244, 63, 94, 0.2);
+}
+
+.liked-empty-state h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.liked-empty-state p {
+  color: var(--text-sub);
+  font-size: 0.92rem;
+  max-width: 440px;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+#drawer-heart-btn.liked {
+  color: var(--accent-rose) !important;
+  border-color: rgba(244, 63, 94, 0.5) !important;
+  background: rgba(244, 63, 94, 0.15) !important;
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.4) !important;
+}
+
+#drawer-heart-btn.liked svg {
+  fill: var(--accent-rose) !important;
+}
+
 /* ==========================================================================
    11. RIGHT SLIDE-OVER STUDIO STAGE (NOW PLAYING, LYRICS & VISUALIZER)
    ========================================================================== */
@@ -2535,6 +2594,30 @@ body:not(.is-playing) .eq-col {
     width: 100%;
     justify-content: center;
     padding: 11px 20px;
+  }
+
+  /* Mobile Playlist & Liked Songs Hero */
+  .playlist-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .playlist-cover-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 16px;
+  }
+
+  .playlist-meta h1 {
+    font-size: 1.8rem;
+  }
+
+  .playlist-action-bar {
+    justify-content: center;
+    margin-bottom: 20px;
   }
 
   /* Audio Strips Mobile */

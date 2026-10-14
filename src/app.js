@@ -13,6 +13,7 @@ class SpotifyApp {
     this.playlists = JSON.parse(localStorage.getItem("user_playlists")) || [...samplePlaylists];
     this.accountLikedSongs = [];
     this.likedTrackIds = new Set();
+    this.pendingLikeTrack = null;
 
     // Engines & Services
     this.audioEngine = new AudioEngine();
@@ -43,13 +44,11 @@ class SpotifyApp {
     // Load liked songs from database for logged-in user
     const currentUser = this.authManager.getUser();
     if (currentUser && currentUser.email) {
-      this.loadLikedSongsForUser(currentUser);
+      await this.loadLikedSongsForUser(currentUser);
     } else {
-      // Check legacy local guest likes if any
-      const legacy = JSON.parse(localStorage.getItem("liked_track_ids") || "[]");
-      if (legacy.length > 0) {
-        this.likedTrackIds = new Set(legacy);
-      }
+      this.accountLikedSongs = [];
+      this.likedTrackIds.clear();
+      this.updateLikedSongsCounter();
     }
 
     // Set initial queue
@@ -165,7 +164,11 @@ class SpotifyApp {
     this.navButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         const viewTarget = btn.getAttribute("data-view");
-        this.switchView(viewTarget);
+        if (viewTarget === "playlist") {
+          this.openLikedSongsView();
+        } else {
+          this.switchView(viewTarget);
+        }
       });
     });
 
@@ -296,7 +299,11 @@ class SpotifyApp {
       btn.addEventListener("click", () => {
         const view = btn.getAttribute("data-view");
         if (view) {
-          this.switchView(view);
+          if (view === "playlist") {
+            this.openLikedSongsView();
+          } else {
+            this.switchView(view);
+          }
           this.mobileNavButtons.forEach(b => b.classList.remove("active"));
           btn.classList.add("active");
           if (this.rightDrawer) this.rightDrawer.classList.remove("mobile-expanded");
@@ -435,19 +442,28 @@ class SpotifyApp {
   }
 
   // --- VIEW ROUTING ---
+  // --- VIEW ROUTING ---
   switchView(viewId) {
     this.currentView = viewId;
     this.views.forEach(v => v.classList.remove("active"));
     this.navButtons.forEach(b => b.classList.remove("active"));
+    this.mobileNavButtons?.forEach(b => b.classList.remove("active"));
 
     const targetView = document.getElementById(`view-${viewId}`);
     const targetNav = document.querySelector(`.nav-item[data-view="${viewId}"]`);
+    const targetMobileNav = document.querySelector(`.mobile-nav-btn[data-view="${viewId}"]`);
 
     if (targetView) targetView.classList.add("active");
     if (targetNav) targetNav.classList.add("active");
+    if (targetMobileNav) targetMobileNav.classList.add("active");
 
     if (viewId === "home") this.renderHomeView();
     if (viewId === "search") this.renderSearchView();
+    if (viewId === "playlist") {
+      if (!this.activePlaylist || this.activePlaylist.id === "liked-songs") {
+        this.renderLikedSongsView();
+      }
+    }
   }
 
   switchDrawerTab(panelId) {
@@ -622,12 +638,43 @@ class SpotifyApp {
   openLikedSongsView() {
     this.activePlaylist = { id: "liked-songs", name: "Liked Songs" };
     this.switchView("playlist");
+    this.renderLikedSongsView();
+  }
 
+  // --- RENDER ACCOUNT LIKED SONGS VIEW ---
+  renderLikedSongsView() {
+    this.activePlaylist = { id: "liked-songs", name: "Liked Songs" };
     const user = this.authManager.getUser();
+    const container = document.getElementById("playlist-tracks-body");
+    const coverImg = document.getElementById("playlist-detail-cover");
+    const titleEl = document.getElementById("playlist-detail-title");
+    const descEl = document.getElementById("playlist-detail-desc");
+    const countEl = document.getElementById("playlist-detail-count");
+    const ownerEl = document.getElementById("playlist-detail-owner");
+    const metaTag = document.getElementById("playlist-meta-tag");
+    const playAllBtn = document.getElementById("playlist-play-all-btn");
 
-    // Combine account-saved songs from database with any sample tracks
+    if (coverImg) {
+      coverImg.src = "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80";
+    }
+    if (titleEl) titleEl.textContent = "Liked Songs";
+    if (metaTag) {
+      metaTag.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="var(--accent-rose)" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>ACCOUNT CLOUD LIBRARY</span>';
+    }
+
+    if (user && user.email) {
+      if (ownerEl) ownerEl.textContent = user.name || user.email;
+      if (descEl) descEl.textContent = `Stored in database for ${user.email}. Synchronized across all your devices.`;
+    } else {
+      if (ownerEl) ownerEl.textContent = "Guest";
+      if (descEl) descEl.textContent = "Log in to permanently store your liked songs in your personal database.";
+    }
+
+    // Build unique list of liked songs
     const combinedMap = new Map();
-    this.accountLikedSongs.forEach(t => combinedMap.set(t.id, t));
+    (this.accountLikedSongs || []).forEach(t => {
+      if (t && t.id) combinedMap.set(t.id, t);
+    });
     this.tracks.forEach(t => {
       if (this.likedTrackIds.has(t.id) && !combinedMap.has(t.id)) {
         combinedMap.set(t.id, t);
@@ -635,20 +682,74 @@ class SpotifyApp {
     });
 
     const likedTracks = Array.from(combinedMap.values());
+    if (countEl) countEl.textContent = `${likedTracks.length} ${likedTracks.length === 1 ? 'song' : 'songs'}`;
 
-    document.getElementById("playlist-detail-cover").src = "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80";
-    document.getElementById("playlist-detail-title").textContent = "Liked Songs";
-    document.getElementById("playlist-detail-desc").textContent = user ? `Stored in database for ${user.email}` : "Your saved favorite music collection.";
-    document.getElementById("playlist-detail-count").textContent = `${likedTracks.length} ${likedTracks.length === 1 ? 'song' : 'songs'}`;
+    // Case 1: User is logged out
+    if (!user || !user.email) {
+      if (container) {
+        container.innerHTML = `
+          <div class="liked-empty-state">
+            <div class="empty-icon-orb">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <h3>Sign in to see your Liked Songs</h3>
+            <p>Your saved favorites are tied to your personal Melo account in the database. Log in or create an account to start building your collection.</p>
+            <button class="btn-primary" id="liked-empty-login-btn" style="padding: 10px 24px; border-radius: 50px; cursor: pointer;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              <span>Log In or Sign Up</span>
+            </button>
+          </div>
+        `;
+        document.getElementById("liked-empty-login-btn")?.addEventListener("click", () => {
+          this.openAuthModal("login");
+        });
+      }
+      if (playAllBtn) {
+        playAllBtn.style.opacity = "0.5";
+        playAllBtn.onclick = () => this.openAuthModal("login");
+      }
+      return;
+    }
+
+    // Case 2: User is logged in, but has 0 liked songs
+    if (likedTracks.length === 0) {
+      if (container) {
+        container.innerHTML = `
+          <div class="liked-empty-state">
+            <div class="empty-icon-orb heart-orb">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </div>
+            <h3>Songs you like will appear here</h3>
+            <p>Save songs to your account by tapping the heart icon on any track while streaming in 320kbps lossless audio.</p>
+            <button class="btn-pill" id="liked-empty-discover-btn" style="cursor: pointer;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+              <span>Discover Trending Songs</span>
+            </button>
+          </div>
+        `;
+        document.getElementById("liked-empty-discover-btn")?.addEventListener("click", () => {
+          this.switchView("home");
+        });
+      }
+      if (playAllBtn) {
+        playAllBtn.style.opacity = "0.5";
+        playAllBtn.onclick = null;
+      }
+      return;
+    }
+
+    // Case 3: User has liked songs
+    if (playAllBtn) {
+      playAllBtn.style.opacity = "1";
+      playAllBtn.onclick = () => {
+        if (likedTracks.length > 0) {
+          this.audioEngine.setQueue(likedTracks);
+          this.audioEngine.loadTrack(likedTracks[0]);
+        }
+      };
+    }
 
     this.renderTrackTable(likedTracks, "playlist-tracks-body");
-
-    document.getElementById("playlist-play-all-btn").onclick = () => {
-      if (likedTracks.length > 0) {
-        this.audioEngine.setQueue(likedTracks);
-        this.audioEngine.loadTrack(likedTracks[0]);
-      }
-    };
   }
 
   // --- SIDEBAR PLAYLISTS ---
@@ -1014,6 +1115,7 @@ class SpotifyApp {
 
     // Liked songs of the account must be stored in the database
     if (!user || !user.email) {
+      this.pendingLikeTrack = track;
       this.openAuthModal("login");
       if (this.emailErrorMsg) {
         this.emailErrorMsg.textContent = "Please log in to save liked songs to your Melo account in the database.";
@@ -1032,6 +1134,10 @@ class SpotifyApp {
       this.accountLikedSongs = this.accountLikedSongs.filter(s => s.id !== trackId);
       this.updateHeartIconUI();
       this.updateLikedSongsCounter();
+
+      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+        this.renderLikedSongsView();
+      }
 
       // Persist deletion to server database
       try {
@@ -1053,12 +1159,19 @@ class SpotifyApp {
         album: track.album || "Single",
         cover: track.cover || "",
         duration: track.duration || 180,
-        audioUrl: track.audioUrl || "",
-        genre: track.genre || "Music"
+        audioUrl: track.audioUrl || track.streamUrl || "",
+        genre: track.genre || "Music",
+        likedAt: Date.now()
       };
       this.accountLikedSongs.unshift(trackObj);
       this.updateHeartIconUI();
       this.updateLikedSongsCounter();
+
+      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+        this.renderLikedSongsView();
+      }
+
+      this.showToastNotification("Added to Liked Songs", `"${track.title}" has been saved to your account in the database.`);
 
       // Persist addition to server database
       try {
@@ -1075,11 +1188,6 @@ class SpotifyApp {
     // Cache to account local storage
     localStorage.setItem(`liked_songs_${cleanEmail}`, JSON.stringify(this.accountLikedSongs));
     localStorage.setItem(`liked_track_ids_${cleanEmail}`, JSON.stringify(Array.from(this.likedTrackIds)));
-
-    // Re-render liked songs page if currently viewing it
-    if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
-      this.openLikedSongsView();
-    }
   }
 
   async loadLikedSongsForUser(user) {
@@ -1088,12 +1196,27 @@ class SpotifyApp {
       this.accountLikedSongs = [];
       this.updateHeartIconUI();
       this.updateLikedSongsCounter();
+      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+        this.renderLikedSongsView();
+      }
       return;
     }
 
     const cleanEmail = user.email.toLowerCase().trim();
 
-    // Query database for account's saved liked songs
+    // 1. Immediately load synchronous local storage cache for this specific email
+    const cachedSongs = JSON.parse(localStorage.getItem(`liked_songs_${cleanEmail}`) || "null");
+    if (cachedSongs && Array.isArray(cachedSongs)) {
+      this.accountLikedSongs = cachedSongs;
+      this.likedTrackIds = new Set(cachedSongs.map(s => s.id));
+      this.updateHeartIconUI();
+      this.updateLikedSongsCounter();
+      if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
+        this.renderLikedSongsView();
+      }
+    }
+
+    // 2. Query database for account's saved liked songs to synchronize with cloud
     try {
       const res = await fetch(`/api/liked-songs?email=${encodeURIComponent(cleanEmail)}`);
       if (res.ok) {
@@ -1106,7 +1229,7 @@ class SpotifyApp {
           this.updateHeartIconUI();
           this.updateLikedSongsCounter();
           if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
-            this.openLikedSongsView();
+            this.renderLikedSongsView();
           }
           if (this.currentView === "playlist" && this.activePlaylist?.id === "liked-songs") {
             this.renderTrackTable(this.accountLikedSongs, "playlist-tracks-body");
@@ -1115,20 +1238,8 @@ class SpotifyApp {
         }
       }
     } catch (err) {
-      console.debug("Database fetch liked songs error, falling back to cache:", err);
+      console.debug("Database fetch liked songs error, using cache:", err);
     }
-
-    // Fallback to local cached data for this account
-    const cachedSongs = JSON.parse(localStorage.getItem(`liked_songs_${cleanEmail}`) || "null");
-    if (cachedSongs && Array.isArray(cachedSongs)) {
-      this.accountLikedSongs = cachedSongs;
-      this.likedTrackIds = new Set(cachedSongs.map(s => String(s.id)));
-    } else {
-      this.accountLikedSongs = [];
-      this.likedTrackIds.clear();
-    }
-    this.updateHeartIconUI();
-    this.updateLikedSongsCounter();
   }
 
   updateLikedSongsCounter() {
@@ -1142,10 +1253,16 @@ class SpotifyApp {
     const isLiked = this.audioEngine.currentTrack && this.likedTrackIds.has(this.audioEngine.currentTrack.id);
     if (isLiked) {
       this.playerHeartBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
-      this.drawerHeartBtn.classList.add("liked");
+      if (this.drawerHeartBtn) {
+        this.drawerHeartBtn.classList.add("liked");
+        this.drawerHeartBtn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="var(--accent-rose)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+      }
     } else {
       this.playerHeartBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
-      this.drawerHeartBtn.classList.remove("liked");
+      if (this.drawerHeartBtn) {
+        this.drawerHeartBtn.classList.remove("liked");
+        this.drawerHeartBtn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+      }
     }
 
     // Sync all strip like buttons across the DOM with inline SVG
@@ -1310,8 +1427,13 @@ class SpotifyApp {
         try {
           const result = await this.authManager.loginWithPassword(email, password);
           await this.loadLikedSongsForUser(result.user);
+          if (this.pendingLikeTrack) {
+            await this.toggleLikeTrackDirect(this.pendingLikeTrack);
+            this.pendingLikeTrack = null;
+          }
           this.closeAuthModal();
           this.showToastNotification(`Welcome back, ${result.user.name}!`, "Logged in successfully. Your liked songs are synchronized.");
+          if (this.currentView === "playlist") this.renderLikedSongsView();
         } catch (err) {
           this.showEmailError(err.message || "Login failed. Please check your credentials.");
         } finally {
@@ -1548,8 +1670,13 @@ class SpotifyApp {
     try {
       const user = await this.authManager.verifyOtp(code);
       await this.loadLikedSongsForUser(user);
+      if (this.pendingLikeTrack) {
+        await this.toggleLikeTrackDirect(this.pendingLikeTrack);
+        this.pendingLikeTrack = null;
+      }
       this.closeAuthModal();
       this.showToastNotification(`Welcome to Melo, ${user.name}!`, "Account verified and connected to database.");
+      if (this.currentView === "playlist") this.renderLikedSongsView();
     } catch (err) {
       const otpContainer = document.querySelector(".otp-inputs-grid");
       if (otpContainer) {
