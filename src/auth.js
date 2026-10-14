@@ -128,6 +128,17 @@ export class AuthManager {
     }
   }
 
+  async accountExists(email) {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail) return false;
+    const response = await fetch(`/api/auth/exists?email=${encodeURIComponent(cleanEmail)}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Could not check this email right now.");
+    }
+    return Boolean(data.exists);
+  }
+
   // Generate and send 6-digit OTP to real Gmail (without revealing or autofilling OTP on screen)
   async sendOtp(email, mode = "signup", pendingPassword = null) {
     const cleanEmail = (email || "").trim().toLowerCase();
@@ -223,15 +234,12 @@ export class AuthManager {
     this.pendingMode = null;
     sessionStorage.removeItem(this.pendingKey);
 
-    // If there was a password submitted for signup, register account in database
+    // A verified signup must be persisted in the file database. Do not fall back
+    // to a browser-only account when persistence fails or the email is duplicated.
     if (mode === "signup" && pendingPass) {
-      try {
-        const regResult = await this.registerWithPassword(targetEmail, pendingPass);
-        this.dismissToast();
-        return regResult.user;
-      } catch (err) {
-        console.warn("Register during OTP verify notice:", err);
-      }
+      const regResult = await this.registerWithPassword(targetEmail, pendingPass);
+      this.dismissToast();
+      return regResult.user;
     }
 
     // Fallback: Create or retrieve user session

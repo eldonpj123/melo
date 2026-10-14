@@ -1321,9 +1321,13 @@ class SpotifyApp {
           return;
         }
 
-        this.setSubmitButtonLoading(true, "Sending code via Gmail...");
+        this.setSubmitButtonLoading(true, "Checking email...");
 
         try {
+          if (await this.authManager.accountExists(email)) {
+            throw new Error("An account with this email already exists. Please log in instead.");
+          }
+          this.setSubmitButtonLoading(true, "Sending code via Gmail...");
           await this.authManager.sendOtp(email, "signup", password);
           this.showOtpStep(email);
         } catch (err) {

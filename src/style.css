@@ -2192,6 +2192,13 @@ body:not(.is-playing) .eq-col {
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9), 0 0 30px rgba(99, 102, 241, 0.2);
   animation: modalPop 0.3s var(--ease-spring);
   width: 100%;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.auth-modal-card {
+  max-width: 440px;
+  padding: 24px !important;
 }
 
 @keyframes modalPop {
@@ -2299,6 +2306,56 @@ body:not(.is-playing) .eq-col {
 @media (max-width: 768px) {
   html, body {
     font-size: 14px;
+  }
+
+  .modal-overlay {
+    align-items: center;
+    padding: 12px;
+  }
+
+  .auth-modal-card {
+    width: min(100%, 390px);
+    max-height: calc(100dvh - 24px);
+    padding: 16px !important;
+    border-radius: 18px;
+  }
+
+  .auth-modal-card .modal-header {
+    margin-bottom: 12px !important;
+  }
+
+  .auth-modal-card .auth-tabs {
+    margin-bottom: 14px !important;
+  }
+
+  .auth-modal-card .auth-step form {
+    margin-top: 14px !important;
+  }
+
+  .auth-modal-card .form-group {
+    margin-bottom: 12px !important;
+  }
+
+  .auth-modal-card input:not(.otp-digit) {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .auth-modal-card .otp-digit {
+    width: clamp(36px, 12vw, 44px);
+    height: 46px;
+  }
+
+  .auth-modal-card #auth-switch-prompt {
+    margin-top: 12px !important;
+  }
+
+  .email-toast-banner {
+    left: 12px;
+    right: 12px;
+    bottom: 86px;
+    max-width: none;
+    padding: 12px 14px;
   }
 
   .spatial-app-layout {
