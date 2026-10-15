@@ -1974,4 +1974,41 @@ class SpotifyApp {
 // Start application when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
   window.spotifyApp = new SpotifyApp();
+
+  // Progressive Web App (PWA) Service Worker Registration & Install Handling
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => console.log("Melo PWA ServiceWorker registered:", reg.scope))
+        .catch((err) => console.warn("Melo PWA ServiceWorker error:", err));
+    });
+  }
+
+  let deferredInstallPrompt = null;
+  const installBtn = document.getElementById("btn-install-pwa");
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (installBtn) {
+      installBtn.classList.remove("hidden");
+    }
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      console.log("Melo PWA install choice:", choice.outcome);
+      deferredInstallPrompt = null;
+      installBtn.classList.add("hidden");
+    });
+  }
+
+  window.addEventListener("appinstalled", () => {
+    console.log("Melo PWA installed successfully!");
+    if (installBtn) installBtn.classList.add("hidden");
+  });
 });
