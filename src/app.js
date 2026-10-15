@@ -82,6 +82,8 @@ class SpotifyApp {
     this.clearSearchBtn = document.getElementById("clear-search-btn");
     this.viewSearchInput = document.getElementById("view-search-input");
     this.viewSearchSubmitBtn = document.getElementById("view-search-submit-btn");
+    this.homeMobileSearchInput = document.getElementById("home-mobile-search-input");
+    this.homeMobileSearchBtn = document.getElementById("home-mobile-search-btn");
 
     // Player Elements
     this.playerTitle = document.getElementById("player-title");
@@ -172,6 +174,7 @@ class SpotifyApp {
       const q = (query || "").trim();
       if (this.globalSearchInput) this.globalSearchInput.value = q;
       if (this.viewSearchInput) this.viewSearchInput.value = q;
+      if (this.homeMobileSearchInput) this.homeMobileSearchInput.value = q;
 
       if (q.length > 0) {
         if (this.clearSearchBtn) this.clearSearchBtn.classList.remove("hidden");
@@ -210,11 +213,39 @@ class SpotifyApp {
       });
     }
 
+    if (this.homeMobileSearchInput) {
+      this.homeMobileSearchInput.addEventListener("input", (e) => {
+        clearTimeout(searchDebounce);
+        const val = e.target.value;
+        if (this.globalSearchInput) this.globalSearchInput.value = val;
+        if (this.viewSearchInput) this.viewSearchInput.value = val;
+        if (val.trim().length > 0) {
+          searchDebounce = setTimeout(() => triggerSearch(val.trim()), 300);
+        }
+      });
+
+      this.homeMobileSearchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          clearTimeout(searchDebounce);
+          triggerSearch(this.homeMobileSearchInput.value);
+        }
+      });
+    }
+
+    if (this.homeMobileSearchBtn) {
+      this.homeMobileSearchBtn.addEventListener("click", () => {
+        const val = this.homeMobileSearchInput?.value || "";
+        triggerSearch(val);
+      });
+    }
+
     if (this.viewSearchInput) {
       this.viewSearchInput.addEventListener("input", (e) => {
         clearTimeout(searchDebounce);
         const val = e.target.value;
         if (this.globalSearchInput) this.globalSearchInput.value = val;
+        if (this.homeMobileSearchInput) this.homeMobileSearchInput.value = val;
         if (val.trim().length > 0) {
           if (this.clearSearchBtn) this.clearSearchBtn.classList.remove("hidden");
           searchDebounce = setTimeout(() => this.performSearch(val.trim()), 300);
@@ -253,6 +284,7 @@ class SpotifyApp {
     this.clearSearchBtn.addEventListener("click", () => {
       if (this.globalSearchInput) this.globalSearchInput.value = "";
       if (this.viewSearchInput) this.viewSearchInput.value = "";
+      if (this.homeMobileSearchInput) this.homeMobileSearchInput.value = "";
       this.clearSearchBtn.classList.add("hidden");
       this.renderSearchView();
     });
@@ -410,6 +442,8 @@ class SpotifyApp {
 
     // Hero Controls & Turntable Deck
     document.getElementById("hero-play-btn")?.addEventListener("click", () => this.audioEngine.togglePlay());
+    document.getElementById("hero-prev-btn")?.addEventListener("click", () => this.audioEngine.prevTrack());
+    document.getElementById("hero-next-btn")?.addEventListener("click", () => this.audioEngine.nextTrack());
     document.getElementById("hero-stage-toggle-btn")?.addEventListener("click", () => {
       if (this.rightDrawer) {
         this.rightDrawer.classList.remove("hidden");
@@ -524,9 +558,8 @@ class SpotifyApp {
   renderSearchView() {
     const searchContainer = document.getElementById("search-results");
     searchContainer.innerHTML = `
-      <div class="shelf-section">
-        <h3>Top Search Suggestions</h3>
-        <p style="color: var(--text-sub); margin-top: 6px;">Type song titles, artists, or genres in the search bar above!</p>
+      <div class="shelf-section" style="margin-bottom: 14px;">
+        <h3 class="shelf-heading" style="font-size: 1.15rem; margin-bottom: 4px;">Popular Songs</h3>
       </div>
     `;
     this.renderTrackTable(this.tracks, null, searchContainer);
@@ -543,14 +576,14 @@ class SpotifyApp {
       t.genre.toLowerCase().includes(lowerQ)
     );
 
-    let html = `<h3>Search Results for "${query}"</h3>`;
+    let html = `<h3>Results for "${query}"</h3>`;
     if (filteredLocal.length > 0) {
       this.renderTrackTable(filteredLocal, null, searchContainer, html);
     } else {
       searchContainer.innerHTML = `
         <div style="padding: 24px 0; text-align: center;">
-          <div class="spinner" style="display: inline-block; width: 28px; height: 28px; border: 3px solid rgba(29, 185, 84, 0.2); border-top-color: var(--spotify-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
-          <p style="color: var(--text-sub);">Searching studio 320kbps ad-free streams for <strong>"${query}"</strong>...</p>
+          <div class="spinner" style="display: inline-block; width: 26px; height: 26px; border: 3px solid rgba(6, 182, 212, 0.2); border-top-color: var(--accent-cyan); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px;"></div>
+          <p style="color: var(--text-sub); font-size: 0.88rem;">Searching for <strong>"${query}"</strong>...</p>
         </div>
       `;
     }
@@ -567,9 +600,9 @@ class SpotifyApp {
         });
 
         html = `
-          <h3>Search Results for "${query}"</h3>
-          <p style="color: var(--spotify-green); margin-bottom: 14px; font-weight: 500;">
-            <i class="fa-solid fa-bolt"></i> ${liveResults.length} Full Songs Ready • 320kbps Ad-Free Studio Stream
+          <h3>Results for "${query}"</h3>
+          <p style="color: var(--accent-cyan); margin-bottom: 12px; font-size: 0.85rem; font-weight: 600;">
+            ${liveResults.length} songs found
           </p>
         `;
         const combined = [...liveResults, ...filteredLocal.filter(l => !liveResults.some(r => r.title.toLowerCase() === l.title.toLowerCase()))];
@@ -585,7 +618,7 @@ class SpotifyApp {
       try {
         const spotifyResults = await this.spotifyClient.searchTracks(query);
         if (spotifyResults.length > 0) {
-          html = `<h3>Search Results for "${query}"</h3><p style="color: var(--spotify-green); margin-bottom: 12px;"><i class="fa-brands fa-spotify"></i> Spotify API Results</p>`;
+          html = `<h3>Results for "${query}"</h3><p style="color: var(--accent-cyan); margin-bottom: 12px; font-size: 0.85rem;">Spotify Results</p>`;
           const combined = [...filteredLocal, ...spotifyResults];
           this.renderTrackTable(combined, null, searchContainer, html);
           return;
@@ -599,8 +632,8 @@ class SpotifyApp {
       this.renderTrackTable(filteredLocal, null, searchContainer, html);
     } else {
       searchContainer.innerHTML = `
-        <h3>No matches found for "${query}"</h3>
-        <p style="color: var(--text-sub); margin-top: 8px;">Try searching by song name (e.g., "Believer", "Blinding Lights") or artist (e.g., "Imagine Dragons", "The Weeknd").</p>
+        <h3>No songs found for "${query}"</h3>
+        <p style="color: var(--text-sub); margin-top: 6px; font-size: 0.85rem;">Try another title or artist.</p>
       `;
     }
   }
@@ -906,7 +939,7 @@ class SpotifyApp {
             <rect x="6" y="4" width="4" height="16" rx="1"></rect>
             <rect x="14" y="4" width="4" height="16" rx="1"></rect>
           </svg>
-          <span>Pause Studio Master</span>
+          <span>Pause</span>
         `;
       }
 
@@ -927,7 +960,7 @@ class SpotifyApp {
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <polygon points="6,4 20,12 6,20"></polygon>
           </svg>
-          <span>Play Studio Master</span>
+          <span>Play</span>
         `;
       }
 

@@ -60,12 +60,12 @@
 
         <button class="nav-item" data-view="search">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <span>Search & Decrypt</span>
+          <span>Search</span>
         </button>
 
         <button class="nav-item" id="liked-songs-btn" data-view="playlist">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-          <span>Liked Collection</span>
+          <span>Liked</span>
         </button>
 
         <button class="nav-item" data-view="library">
@@ -80,7 +80,7 @@
         <!-- Global Quick Search Capsule -->
         <div class="header-search-container" id="header-search-box">
           <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="global-search-input" placeholder="Search title or artist..." autocomplete="off">
+          <input type="text" id="global-search-input" placeholder="Search songs or artists..." autocomplete="off">
           <button id="clear-search-btn" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
@@ -123,6 +123,24 @@
            ==================================================================== -->
       <div class="content-view active" id="view-home">
         
+        <!-- FIRST PAGE MOBILE SEARCH BAR (JUST BELOW TOP BANNER DOCK) -->
+        <div class="home-mobile-search-card" id="home-mobile-search-card">
+          <div class="home-mobile-search-inner">
+            <svg class="home-search-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="home-mobile-search-input" placeholder="Search songs, artists..." autocomplete="off">
+            <button type="button" id="home-mobile-search-btn" class="home-mobile-search-action-btn" aria-label="Search">
+              <span>Search</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <!-- HERO CUBIC STUDIO BILLBOARD -->
         <section class="hero-billboard-card">
           <div class="billboard-artwork-col" id="billboard-cover-wrapper" title="Click to play / inspect stage">
@@ -140,27 +158,37 @@
             <div class="billboard-badge-row">
               <span class="meta-stream-badge">
                 <span class="pulse-emerald"></span>
-                <span>320KBPS DIRECT CDN STREAM</span>
+                <span>320kbps HD</span>
               </span>
-              <span class="meta-genre-badge" id="hero-track-genre">Synthwave • Ad-Free</span>
+              <span class="meta-genre-badge" id="hero-track-genre">Synthwave</span>
             </div>
 
             <h1 class="billboard-title" id="greeting-title">Good evening</h1>
             <h2 class="billboard-song-title" id="hero-song-title">Midnight City Lights</h2>
-            <p class="billboard-artist" id="hero-song-artist">Neon Skyline • Cyberpunk Nights</p>
+            <p class="billboard-artist" id="hero-song-artist">Neon Skyline</p>
 
             <div class="billboard-controls-row">
-              <button class="btn-hero-play" id="hero-play-btn" title="Play Track">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="6,4 20,12 6,20"></polygon></svg>
-                <span>Play Studio Master</span>
-              </button>
+              <div class="billboard-playback-group">
+                <button class="btn-hero-ctrl" id="hero-prev-btn" title="Previous Track" aria-label="Previous Track">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="19,20 9,12 19,4"></polygon><rect x="4" y="4" width="3" height="16" rx="1"></rect></svg>
+                </button>
 
-              <button class="btn-hero-glass" id="hero-stage-toggle-btn" title="Open Synchronized Lyrics & Audio Spectrum">
+                <button class="btn-hero-play" id="hero-play-btn" title="Play Track">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="6,4 20,12 6,20"></polygon></svg>
+                  <span>Play</span>
+                </button>
+
+                <button class="btn-hero-ctrl" id="hero-next-btn" title="Next Track" aria-label="Next Track">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5,4 15,12 5,20"></polygon><rect x="17" y="4" width="3" height="16" rx="1"></rect></svg>
+                </button>
+              </div>
+
+              <button class="btn-hero-glass" id="hero-stage-toggle-btn" title="Open Lyrics & Stage">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                <span>Karaoke Lyrics & Spectrum</span>
+                <span>Lyrics</span>
               </button>
 
-              <div class="hero-eq-bars" title="Real-time Frequency Resonance">
+              <div class="hero-eq-bars" title="Audio Spectrum">
                 <span class="eq-col col-1"></span>
                 <span class="eq-col col-2"></span>
                 <span class="eq-col col-3"></span>
@@ -174,8 +202,8 @@
         <section class="shelf-section">
           <div class="shelf-header">
             <div class="shelf-title-group">
-              <h3 class="shelf-heading">Acoustic Rotation</h3>
-              <span class="shelf-subheading">Instant high-fidelity 320kbps direct master streams</span>
+              <h3 class="shelf-heading">Popular Songs</h3>
+              <span class="shelf-subheading">Trending high quality tracks</span>
             </div>
           </div>
           <div class="quick-grid" id="quick-play-grid">
@@ -187,10 +215,10 @@
         <section class="shelf-section">
           <div class="shelf-header">
             <div class="shelf-title-group">
-              <h3 class="shelf-heading">Curated Sound Horizons</h3>
-              <span class="shelf-subheading">Commercial-free handpicked acoustic & electronic sets</span>
+              <h3 class="shelf-heading">Featured Playlists</h3>
+              <span class="shelf-subheading">Handpicked playlists for your vibe</span>
             </div>
-            <a href="#" class="see-all" id="see-all-playlists-btn">Explore All</a>
+            <a href="#" class="see-all" id="see-all-playlists-btn">See All</a>
           </div>
           <div class="card-carousel" id="made-for-you-cards">
             <!-- Dynamically injected -->
@@ -201,8 +229,8 @@
         <section class="shelf-section">
           <div class="shelf-header">
             <div class="shelf-title-group">
-              <h3 class="shelf-heading">Sonic Dimensions & Frequencies</h3>
-              <span class="shelf-subheading">Select your style & atmospheric mood</span>
+              <h3 class="shelf-heading">Genres</h3>
+              <span class="shelf-subheading">Browse by style and mood</span>
             </div>
           </div>
           <div class="genre-grid" id="genre-grid">
@@ -237,8 +265,8 @@
         <section class="shelf-section">
           <div class="shelf-header">
             <div class="shelf-title-group">
-              <h3 class="shelf-heading">Studio Audio Vault</h3>
-              <span class="shelf-subheading">Lossless master streams with live synced lyrics</span>
+              <h3 class="shelf-heading">Top Tracks</h3>
+              <span class="shelf-subheading">Stream with synchronized lyrics</span>
             </div>
           </div>
           <div class="audio-strips-wrapper">
@@ -251,29 +279,28 @@
       </div>
 
       <!-- ====================================================================
-           VIEW: SEARCH & DECRYPT (LIVE JIOSAAVN 320KBPS ENGINE)
+           VIEW: SEARCH (CLEAN, MINIMAL, MOBILE-FRIENDLY)
            ==================================================================== -->
       <div class="content-view" id="view-search">
         <div class="search-view-hero">
-          <span class="meta-tag"><i class="fa-solid fa-bolt" style="color: var(--accent-cyan);"></i> DIRECT JIOSAAVN CDN DECRYPTOR</span>
-          <h2 class="search-view-title">Search Any Track on Earth</h2>
-          <p class="search-view-desc">Stream commercial-free in 320kbps studio bitrate with real-time lyrics.</p>
+          <h2 class="search-view-title">Search</h2>
+          <p class="search-view-desc">Find your favorite songs and artists</p>
           
           <!-- In-Page Search Bar -->
           <div class="page-search-wrapper">
             <div class="search-input-pill">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="view-search-input" placeholder="Search song name (e.g. Believer, Blinding Lights, Taylor Swift)..." autocomplete="off">
-              <button id="view-search-submit-btn" class="btn-primary">
-                <span>Decrypt & Play</span>
-                <i class="fa-solid fa-arrow-right"></i>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="view-search-input" placeholder="Search songs, artists..." autocomplete="off">
+              <button id="view-search-submit-btn" class="search-submit-pill-btn" aria-label="Search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span class="submit-btn-text">Search</span>
               </button>
             </div>
           </div>
 
           <!-- Quick Trending Suggestion Chips -->
           <div class="trending-chips-row">
-            <span class="chips-label">TRENDING NOW:</span>
+            <span class="chips-label">Trending:</span>
             <div class="search-filter-pills" id="quick-search-chips">
               <button class="filter-pill chip-btn" data-query="Believer"><i class="fa-solid fa-fire" style="color: #ff5500;"></i> Believer</button>
               <button class="filter-pill chip-btn" data-query="Blinding Lights"><i class="fa-solid fa-fire" style="color: #ff5500;"></i> Blinding Lights</button>
@@ -281,7 +308,7 @@
               <button class="filter-pill chip-btn" data-query="The Weeknd">The Weeknd</button>
               <button class="filter-pill chip-btn" data-query="Taylor Swift">Taylor Swift</button>
               <button class="filter-pill chip-btn" data-query="Synthwave">Synthwave</button>
-              <button class="filter-pill chip-btn" data-query="Lo-Fi">Lo-Fi Chill</button>
+              <button class="filter-pill chip-btn" data-query="Lo-Fi">Lo-Fi</button>
             </div>
           </div>
         </div>
